@@ -1,0 +1,63 @@
+# ============================
+# Python / Django
+# ============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+
+# Django stuff
+*.log
+*.pot
+*.pyc
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+static_root/
+
+# ============================
+# Virtual Environment
+# ============================
+venv/
+.venv/
+
+# ============================
+# VSCode
+# ============================
+.vscode/
+.history/
+
+# ============================
+# Node / Vue / Frontend
+# ============================
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ============================
+# OS Files
+# ============================
+.DS_Store
+Thumbs.db
+
+# ============================
+# Build / Cache
+# ============================
+*.egg-info/
+.eggs/
+build/
+develop-eggs/
+__pycache__/
+pip-wheel-metadata/
+pytest_cache/
+coverage/
+
+# ============================
+# IDE
+# ============================
+.idea/
+*.iml

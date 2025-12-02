@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}은행/ATM 위치 찾기 - 고앤목 금융 커뮤니티{% endblock %}
+{% block nav_banks %}active{% endblock %}
+
+{% block content %}
+<section class="panel-section">
+  <h2 class="section-title">은행 / ATM 위치 찾기</h2>
+  <p class="section-subtitle">
+    현재 위치를 기준으로 주변 은행 지점과 ATM을 검색할 수 있습니다.
+  </p>
+
+  <!-- 상단 컨트롤 -->
+  <div class="map-controls">
+    <div class="map-buttons">
+      <button id="btn-banks" class="btn small primary">주변 은행 찾기</button>
+      <button id="btn-atms" class="btn small outline">주변 ATM 찾기</button>
+    </div>
+
+    <div class="map-search">
+      <input id="custom-keyword" type="text" class="input" placeholder="예: 국민은행, 농협 ATM, 우리은행 구미점 등">
+      <button id="btn-custom-search" class="btn small secondary">검색</button>
+    </div>
+  </div>
+
+  <!-- 지도 -->
+  <div id="map" style="width:100%; height:500px; border-radius:8px; margin-top:10px;"></div>
+
+  <!-- 검색결과 -->
+  <div class="result-wrapper" style="margin-top:16px;">
+    <div class="result-header">
+      <h3 class="result-title">검색 결과</h3>
+      <span id="result-count" class="result-count"></span>
+    </div>
+    <ul id="result-list" class="result-list"></ul>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+
+<!-- Kakao Maps SDK -->
+<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey={{ kakao_map_js_key }}&libraries=services"></script>
+
+<script>
+// ===========================
+// 전역
+// ===========================
+let map;
+let markers = [];
+let infowindow;
+let places;
+
+// ===========================
+// DOMContentLoaded
+// ===========================
+document.addEventListener("DOMContentLoaded", function () {
+
+  // 카카오 SDK 로드 여부 확인
+  if (!(window.kakao && kakao.maps)) {
+    console.error("카카오 지도 SDK가 로드되지 않았습니다. 키 또는 도메인 확인 필요.");
+    alert("카카오 지도를 불러오지 못했습니다. 콘솔 오류를 확인해주세요.");
+    return;
+  }
+
+  const DEFAULT_CENTER = new kakao.maps.LatLng(37.5665, 126.9780);
+
+  // ---------------------------
+  // 지도 초기화
+  // ---------------------------
+  function initMap(center) {
+    const mapContainer = document.getElementById("map");
+    const mapOption = {
+      center: center || DEFAULT_CENTER,
+      level: 5,
+    };
+
+    map = new kakao.maps.Map(mapContainer, mapOption);
+    infowindow = new kakao.maps.InfoWindow({ zIndex: 1 });
+    places = new kakao.maps.services.Places();
+
+    new kakao.maps.Marker({
+      map: map,
+      position: center || DEFAULT_CENTER,
+    });
+  }
+
+  // ---------------------------
+  // 현재 위치 기반 지도
+  // ---------------------------
+  function loadMapWithCurrentLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const loc = new kakao.maps.LatLng(lat, lng);
+          initMap(loc);
+        },
+        function () {
+          console.warn("현재 위치 실패 → 기본 위치 사용");
+          initMap(DEFAULT_CENTER);
+        }
+      );
+    } else {
+      initMap(DEFAULT_CENTER);
+    }
+  }
+
+  // ---------------------------
+  // 유틸
+  // ---------------------------
+  function clearMarkers() {
+    markers.forEach(m => m.setMap(null));
+    markers = [];
+  }
+
+  function clearResultList() {
+    document.getElementById("result-list").innerHTML = "";
+    document.getElementById("result-count").textContent = "";
+  }
+
+  // ---------------------------
+  // 검색 함수
+  // ---------------------------
+  function searchAroundCenter(keyword) {
+    if (!places) return;
+
+    const center = map.getCenter();
+
+    places.keywordSearch(
+      keyword,
+      function (data, status) {
+        if (status === kakao.maps.services.Status.OK) {
+          displayPlaces(data);
+        } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+          alert("검색 결과가 없습니다.");
+          clearMarkers();
+          clearResultList();
+        } else {
+          alert("검색 오류가 발생했습니다.");
+        }
+      },
+      {
+        location: center,
+        radius: 2000,
+      }
+    );
+  }
+
+  // ---------------------------
+  // 검색결과 표시
+  // ---------------------------
+  function displayPlaces(placesData) {
+    clearMarkers();
+    clearResultList();
+
+    const bounds = new kakao.maps.LatLngBounds();
+    const listEl = document.getElementById("result-list");
+    const countEl = document.getElementById("result-count");
+
+    placesData.forEach((place, idx) => {
+      const position = new kakao.maps.LatLng(place.y, place.x);
+
+      const marker = new kakao.maps.Marker({
+        map: map,
+        position: position,
+      });
+
+      markers.push(marker);
+      bounds.extend(position);
+
+      const content = `
+        <div style="padding:8px;font-size:13px;">
+          <strong>${place.place_name}</strong><br>
+          ${place.road_address_name || place.address_name}<br>
+          ${place.phone || ""}<br>
+          <a href="https://map.kakao.com/link/to/${place.id}" target="_blank">길찾기</a>
+        </div>
+      `;
+
+      kakao.maps.event.addListener(marker, "click", function () {
+        infowindow.setContent(content);
+        infowindow.open(map, marker);
+      });
+
+      const li = document.createElement("li");
+      li.className = "result-item";
+      li.innerHTML = `
+        <div class="result-item-main">
+          <div class="result-item-title">${place.place_name}</div>
+          <div class="result-item-address">${place.road_address_name || place.address_name}</div>
+          <div class="result-item-phone">${place.phone || ""}</div>
+        </div>
+        <div class="result-item-badge">${idx + 1}</div>
+      `;
+
+      li.addEventListener("click", function () {
+        map.panTo(position);
+        infowindow.setContent(content);
+        infowindow.open(map, marker);
+      });
+
+      listEl.appendChild(li);
+    });
+
+    map.setBounds(bounds);
+    countEl.textContent = `검색 결과: ${placesData.length}개`;
+  }
+
+  // ---------------------------
+  // 실제 실행
+  // ---------------------------
+  loadMapWithCurrentLocation();
+
+  // ---------------------------
+  // 버튼 이벤트
+  // ---------------------------
+  const btnBanks = document.getElementById("btn-banks");
+  const btnAtms = document.getElementById("btn-atms");
+  const btnCustom = document.getElementById("btn-custom-search");
+  const inputCustom = document.getElementById("custom-keyword");
+
+  btnBanks.addEventListener("click", () => {
+    searchAroundCenter("은행");
+    btnBanks.classList.add("primary");
+    btnBanks.classList.remove("outline");
+    btnAtms.classList.add("outline");
+    btnAtms.classList.remove("primary");
+  });
+
+  btnAtms.addEventListener("click", () => {
+    searchAroundCenter("ATM");
+    btnAtms.classList.add("primary");
+    btnAtms.classList.remove("outline");
+    btnBanks.classList.add("outline");
+    btnBanks.classList.remove("primary");
+  });
+
+  btnCustom.addEventListener("click", () => {
+    const keyword = inputCustom.value.trim();
+    if (!keyword) {
+      alert("검색어를 입력해주세요.");
+      return;
+    }
+    searchAroundCenter(keyword);
+    btnBanks.classList.add("outline");
+    btnBanks.classList.remove("primary");
+    btnAtms.classList.add("outline");
+    btnAtms.classList.remove("primary");
+  });
+
+  inputCustom.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") btnCustom.click();
+  });
+
+});
+</script>
+{% endblock %}

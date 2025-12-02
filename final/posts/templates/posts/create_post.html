@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}글 작성{% endblock %}
+
+{% block content %}
+<section class="panel form-panel">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+    <h1 style="margin:0;">게시글 작성</h1>
+    <a href="{% url 'posts:index' %}" class="btn">목록</a>
+  </div>
+
+  <!-- 폼 전체 에러 -->
+  {% if form.non_field_errors %}
+    <div class="panel" style="border-color:#ff6b6b; background:rgba(255,107,107,.08); margin-bottom:12px;">
+      {% for e in form.non_field_errors %}<div>{{ e }}</div>{% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" class="form-grid">
+    {% csrf_token %}
+
+    <div class="field">
+      <div class="label">제목</div>
+      {{ form.title }}
+      {% if form.title.errors %}
+        <div class="muted" style="color:#ff6b6b; font-size:12px; margin-top:6px;">
+          {% for e in form.title.errors %}{{ e }}{% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="field">
+      <div class="label">내용</div>
+      {{ form.content }}
+      {% if form.content.errors %}
+        <div class="muted" style="color:#ff6b6b; font-size:12px; margin-top:6px;">
+          {% for e in form.content.errors %}{{ e }}{% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px;">
+      <a href="{% url 'posts:index' %}" class="btn">취소</a>
+      <button type="submit" class="btn primary">저장</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

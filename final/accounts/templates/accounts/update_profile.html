@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}프로필 수정{% endblock %}
+
+{% block content %}
+<section class="panel form-panel" style="max-width:1000px;margin:auto;">
+  <h1 class="form-title">프로필 수정</h1>
+
+  <!-- 파일 업로드를 위해 enctype 필요 -->
+  <form method="post" enctype="multipart/form-data" class="form-grid">
+    {% csrf_token %}
+
+    <!-- 폼 에러 -->
+    {% if form and form.errors %}
+      <ul class="form-errors">
+        {% for field, errs in form.errors.items %}
+          <li><strong>{{ field }}:</strong> {{ errs|striptags }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {{ form.non_field_errors }}
+
+    <div style="display:flex; gap:24px; flex-wrap:wrap;">
+      <!-- 현재 아바타 & 미리보기 -->
+      <div style="flex:0 0 140px; text-align:center;">
+        <div style="width:140px; height:140px; border-radius:50%; overflow:hidden; border:1px solid #eee; background:#fafafa;">
+          {% if user.profile_image %}
+            <img id="avatarPreview" src="{{ user.profile_image.url }}" alt="avatar" style="width:100%; height:100%; object-fit:cover;">
+          {% else %}
+            <img id="avatarPreview" src="{% static 'img/avatar_default.png' %}" alt="avatar" style="width:100%; height:100%; object-fit:cover;">
+          {% endif %}
+        </div>
+        <div class="hint" style="margin-top:8px;">미리보기</div>
+      </div>
+
+      <!-- 입력 필드 -->
+      <div style="flex:1 1 360px;">
+        <div class="field">
+          <div class="label">이름</div>
+          <input type="text" name="first_name" class="input"
+                value="{{ form.first_name.value|default:user.first_name }}">
+        </div>
+        <div class="field">
+          <div class="label">성</div>
+          <input type="text" name="last_name" class="input"
+                value="{{ form.last_name.value|default:user.last_name }}">
+        </div>
+        <div class="field">
+          <div class="label">닉네임</div>
+          <input type="text" name="nickname" class="input"
+                value="{{ form.nickname.value|default:user.nickname }}">
+        </div>
+        <div class="field">
+          <div class="label">생년월일</div>
+          <input type="date" name="birthdate" class="input"
+                value="{{ form.birthdate.value|default:user.birthdate|date:'Y-m-d' }}">
+        </div>
+        <div class="field">
+          <div class="label">휴대폰 번호</div>
+          <input type="text" name="phone_number" class="input"
+                value="{{ form.phone_number.value|default:user.phone_number }}">
+        </div>
+        <div class="field">
+          <div class="label">이메일</div>
+          <input type="email" name="email" class="input"
+                value="{{ form.email.value|default:user.email }}">
+        </div>
+
+        <div class="field">
+          <div class="label">프로필 이미지</div>
+          <input type="file" name="profile_image" accept="image/*" class="input" id="avatarInput">
+          <!-- 이미지 제거 체크 (뷰/폼에서 처리) -->
+          {% if user.profile_image %}
+          <label style="display:flex; align-items:center; gap:6px; margin-top:8px;">
+            <input type="checkbox" name="remove_profile_image" value="1">
+            <span>현재 프로필 이미지 삭제</span>
+          </label>
+          {% endif %}
+        </div>
+
+        <div class="field">
+          <div class="label">비밀번호</div>
+          <a href="{% url 'accounts:change_password' %}" class="btn">비밀번호 변경</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" style="justify-content:flex-end; gap:8px; margin-top:12px;">
+      <a href="{% url 'accounts:profile' %}" class="btn">취소</a>
+      <button type="submit" class="btn primary">저장</button>
+    </div>
+  </form>
+</section>
+
+<!-- 간단 미리보기 스크립트 -->
+<script>
+  (function(){
+    const input = document.getElementById('avatarInput');
+    const preview = document.getElementById('avatarPreview');
+    if (!input || !preview) return;
+    input.addEventListener('change', function(e){
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt){
+        preview.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  })();
+</script>
+{% endblock %}

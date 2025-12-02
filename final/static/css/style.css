@@ -1,0 +1,290 @@
+/* =============================== */
+/* THEME VARIABLES (Dark default)  */
+/* =============================== */
+:root {
+  /* Dark (default) */
+  --bg: #0b0f16;
+  --panel: #1c1f26;
+  --surface: #0c0f14;
+  --border: #2c313a;
+  --text: #ffffff;
+  --text-muted: #9aa2b1;
+  --muted: #888ea4;
+  --primary: #5fb0ff;
+  --input: #0f1218;
+  --ok: #5fd38d;
+  --error: #ff6b6b;
+
+  /* 버튼/라벨 전용 */
+  --btn-bg: #232a36;
+  --btn-text: var(--text);
+  --btn-border: var(--border);
+  --label-color: #dfe3ea;
+
+  /* 공통 */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 0 rgba(0,0,0,0.2);
+  --shadow-md: 0 6px 16px rgba(0,0,0,0.2);
+}
+
+/* Light theme override */
+:root[data-theme="light"] {
+  --bg: #f6f8fb;
+  --panel: #ffffff;
+  --surface: #ffffff;
+  --border: #e5e9f0;
+  --text: #111318;
+  --text-muted: #6b7280;
+  --muted: #6b7280;
+  --primary: #387ef7;
+  --input: #ffffff;
+  --ok: #10b981;
+  --error: #ef4444;
+
+  --btn-bg: #ffffff;
+  --btn-text: #111318;
+  --btn-border: #e5e9f0;
+  --label-color: #6b7280;
+
+  --shadow-sm: 0 1px 0 rgba(0,0,0,0.06);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+/* 시스템 라이트 선호(저장값 없을 때만 힌트) */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) { color-scheme: light; }
+}
+
+/* ============ 기본 설정 ============ */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', sans-serif;
+  padding: 20px;
+}
+
+/* ============ 패널 ============ */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+/* ============ 폼 입력 요소 ============ */
+.label {
+  font-size: 13px;
+  color: var(--label-color);
+}
+
+.input,
+.textarea {
+  background: var(--input);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  width: 100%;
+  outline: none;
+}
+
+.textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+/* ============ 버튼 ============ */
+.btn {
+  background: var(--btn-bg);
+  border: 1px solid var(--btn-border);
+  color: var(--btn-text);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  transition: filter 0.2s ease, background 0.2s ease;
+}
+.btn:hover { filter: brightness(1.02); }
+
+.btn.primary {
+  background: var(--primary);
+  color: #0b1220;
+  border-color: transparent;
+}
+
+.btn.ghost {
+  background: transparent;
+  border: 1px dashed var(--btn-border);
+  color: var(--muted);
+}
+
+.btn.small {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+/* ============ 상태 표시 ============ */
+.status { margin-left: 8px; font-size: 12px; color: var(--muted); }
+.status.ok { color: var(--ok); }
+.status.error { color: var(--error); }
+
+/* ============ 칩 ============ */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  font-size: 13px;
+}
+.chip input { accent-color: var(--primary); transform: scale(1.1); }
+
+/* ============ 테이블 ============ */
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-md); }
+table { width: 100%; border-collapse: collapse; }
+th, td { border-bottom: 1px solid var(--border); padding: 10px; text-align: center; }
+th { position: sticky; top: 0; background: color-mix(in oklab, var(--panel), black 8%); z-index: 1; }
+
+/* ============ 레이아웃 공통 ============ */
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.field { display: grid; gap: 6px; margin-bottom: 12px; }
+.inline { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.section-title { font-weight: 700; margin: 6px 0 10px 0; }
+.hint { font-size: 12px; color: var(--muted); }
+
+/* ============ 프로필 그리드 ============ */
+.grid-profile {
+  display: grid; grid-template-columns: 360px 1fr; gap: 18px;
+  grid-template-areas: "intro prefs";
+}
+.intro-area { grid-area: intro; }
+.prefs-area { grid-area: prefs; }
+
+@media (max-width: 768px) {
+  .grid-profile {
+    grid-template-columns: 1fr;
+    grid-template-areas: "intro" "prefs";
+  }
+}
+
+/* ============ 기타 ============ */
+.hidden { display: none !important; }
+.weights-list { list-style: none; padding-left: 0; font-size: 15px; margin-top: 10px; }
+.weights-list li { margin-bottom: 6px; }
+
+/* ============ 이미지 업로드 ============ */
+.image-upload { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.preview {
+  width: 100%; max-width: 320px; max-height: 240px; overflow: hidden;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background-color: var(--surface); display: flex; align-items: center; justify-content: center;
+}
+.preview img { width: 100%; height: auto; object-fit: contain; border-radius: 6px; }
+
+/* ============ Navbar ============ */
+.navbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 12px 16px; margin-bottom: 16px; background: var(--panel);
+  border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+}
+
+.logo a { color: var(--text); font-weight: 700; text-decoration: none; letter-spacing: 0.2px; }
+
+.nav-links { display: flex; align-items: center; gap: 10px; }
+
+.nav-links a {
+  color: var(--text); text-decoration: none; font-size: 14px;
+  padding: 6px 8px; border-radius: var(--radius-sm); transition: background 0.15s ease;
+}
+.nav-links a:hover { background: color-mix(in oklab, var(--panel), white 6%); }
+
+.nav-links a.active {
+  background: color-mix(in oklab, var(--panel), white 8%);
+  border: 1px solid color-mix(in oklab, var(--border), white 18%);
+  padding: 6px 10px; border-radius: var(--radius-sm);
+}
+
+/* ============ Post list ============ */
+.post-list { display: grid; gap: 12px; }
+.post-card {
+  display: grid; gap: 6px; padding: 14px;
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  background: var(--panel); transition: border-color 0.15s ease, transform 0.05s ease;
+}
+.post-card:hover { border-color: color-mix(in oklab, var(--border), white 18%); }
+.post-title { font-size: 18px; font-weight: 700; }
+.post-title a { color: var(--text); text-decoration: none; }
+.post-meta { font-size: 12px; color: var(--text-muted); }
+
+/* ============ Post detail ============ */
+.post-header {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px;
+}
+.post-actions { display: inline-flex; gap: 8px; }
+.post-content { margin: 8px 0 16px; line-height: 1.7; }
+
+/* ============ Comments ============ */
+.comment-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.comment-item {
+  display: grid; gap: 6px; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface);
+}
+.comment-meta { font-size: 12px; color: var(--text-muted); }
+.comment-actions { display: inline-flex; gap: 6px; }
+.comment-footer {
+  display: flex; align-items: center; justify-content: space-between; font-size: 12.5px;
+}
+
+/* ============ 구분선 & 인라인 폼 ============ */
+hr.divider { border: 0; height: 1px; background: var(--border); margin: 12px 0; }
+.inline-form { display: inline; }
+
+/* ============ Post layout ============ */
+.post-main {
+  max-width: 900px; margin: 0 auto 20px; padding: 28px; font-size: 16px; line-height: 1.8;
+}
+.comments-panel {
+  max-width: 800px; margin: 0 auto; padding: 18px;
+  background: color-mix(in oklab, var(--panel), black 4%);
+}
+
+/* 게시글 제목 */
+.post-header h1 { letter-spacing: -0.3px; }
+
+/* 게시판 제목 + 버튼 */
+.list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.board-title { font-size: 24px; font-weight: 700; margin: 0; }
+.right-btn { display: flex; align-items: center; justify-content: flex-end; }
+
+/* 플로팅 버튼 */
+.fab {
+  position: fixed; right: 18px; bottom: 18px; width: 48px; height: 48px;
+  display: grid; place-items: center; border-radius: 50%; background: var(--primary);
+  color: #0b1220; text-decoration: none; font-size: 28px; font-weight: 700; border: none; box-shadow: var(--shadow-md);
+}
+.fab:hover { filter: brightness(1.05); }
+
+/* ============ Accounts form ============ */
+.form-panel { max-width: 520px; margin: 0 auto; }
+.form-title { margin: 0 0 12px 0; font-size: 22px; font-weight: 700; }
+.form-grid { display: grid; gap: 12px; }
+
+/* ============ Home ============ */
+.hero { padding: 26px 24px; }
+.hero h1 { margin: 0 0 6px 0; font-size: 28px; font-weight: 800; }
+.grid-3 {
+  display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 16px; margin-top: 16px;
+}
+@media (max-width: 960px) { .grid-3 { grid-template-columns: 1fr; } }
+
+/* ============ 리스트 ============ */
+.list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.list-item {
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius-md);
+  background: var(--surface); transition: border-color 0.15s ease, transform 0.05s ease;
+}
+.list-item:hover { border-color: var(--primary); transform: scale(1.02); }
+.list-item a { color: var(--text); text-decoration: none; }
+.list-item .meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }

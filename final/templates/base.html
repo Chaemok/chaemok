@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko" data-theme="{{ request.session.theme|default:'dark' }}">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}고앤목 금융 커뮤니티{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20251110">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <!-- 공통 네비게이션 -->
+  <header class="navbar">
+    <div class="logo">
+      <a href="{% url 'home' %}">🏦 SSAFY Finance</a>
+    </div>
+    <nav class="nav-links">
+      <a href="{% url 'theme_toggle' %}?next={{ request.get_full_path|urlencode }}" class="btn small">
+      {% if request.session.theme == 'light' %}
+        🌞라이트
+      {% else %}
+        🌙 다크
+      {% endif %}
+      </a>
+      <!-- 공지사항 -->
+      <a href="{% url 'notices:index' %}" class="{% block nav_notice %}{% endblock %}">공지사항</a>
+      <!-- 자유 게시판 -->
+      <a href="{% url 'posts:index' %}" class="{% block nav_free %}{% endblock %}">자유 게시판</a>
+
+      <!-- 금융 추천 서비스 -->
+      <a href="{% url 'finances:recommend' %}" class="{% block nav_fin %}{% endblock %}">주식 추천 서비스</a>
+      <!-- 은행/ATM 찾기 -->
+      <a href="{% url 'banks:map' %}" class="{% block nav_banks %}{% endblock %}">은행/증권사 찾기</a>
+      {% if user.is_authenticated %}
+        <!-- 내 프로필 -->
+        <a href="{% url 'accounts:profile' %}" class="{% block nav_profile %}{% endblock %}">내 프로필</a>
+
+        {% if user.is_superuser %}
+          <span>안녕하세요, {{ user.username }}님</span>
+        {% else %}
+          <span>안녕하세요, {{ user.nickname }}님</span>
+        {% endif %}
+        <a href="{% url 'accounts:logout' %}" class="btn logout">로그아웃</a>
+      {% else %}
+        <!-- 로그인 / 회원가입 -->
+        <a href="{% url 'accounts:login' %}" class="btn">로그인</a>
+        <a href="{% url 'accounts:signup' %}" class="btn">회원가입</a>
+      {% endif %}
+    </nav>
+  </header>
+  {% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <main class="panel">
+    {% block content %}{% endblock %}
+  </main>
+  
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
