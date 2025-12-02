@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+{% block title %}회원 정보 및 고배당 랭킹{% endblock %}
+{% block nav_fin %}active{% endblock %}
+{% block content %}
+<section class="grid-profile">
+  <!-- 자기소개 -->
+  <div class="intro-area">
+    <div class="field">
+      <div class="label">자기 소개</div>
+      <div class="inline">
+        <textarea id="intro" class="textarea" placeholder="간단한 소개를 입력하세요."></textarea>
+        <button class="btn primary" id="btn-save-intro">Update</button>
+      </div>
+      <div id="intro-status" class="hint">저장되지 않음</div>
+
+      <div class="image-upload">
+        <label for="image-input" class="btn ghost">이미지 업로드</label>
+        <input type="file" id="image-input" accept="image/*" class="hidden" />
+        <div id="image-preview" class="preview"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 투자 성향 -->
+  <div class="prefs-area">
+    <div class="section-title">투자 성향</div>
+    <div class="panel">
+      <div class="field">
+        <div class="label">투자상품 선호도(복수 선택)</div>
+        <div class="chips checks" id="product-prefs">
+          <label class="chip"><input type="checkbox" value="배당주" /> 배당주</label>
+          <label class="chip"><input type="checkbox" value="성장주" /> 성장주</label>
+          <label class="chip"><input type="checkbox" value="가치주" /> 가치주</label>
+          <label class="chip"><input type="checkbox" value="리츠" /> 리츠</label>
+          <label class="chip"><input type="checkbox" value="ETF" /> ETF</label>
+          <label class="chip"><input type="checkbox" value="채권" /> 채권</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label">투자 스타일(단일 선택)</div>
+        <div class="chips radios" id="style-prefs">
+          <label class="chip"><input type="radio" name="style" value="안정형" /> 안정형</label>
+          <label class="chip"><input type="radio" name="style" value="균형형" /> 균형형</label>
+          <label class="chip"><input type="radio" name="style" value="공격형" /> 공격형</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label">관심 종목/종류(복수 선택)</div>
+        <div class="chips checks" id="sector-prefs">
+          <label class="chip"><input type="checkbox" value="은행" /> 은행</label>
+          <label class="chip"><input type="checkbox" value="통신" /> 통신</label>
+          <label class="chip"><input type="checkbox" value="반도체" /> 반도체</label>
+          <label class="chip"><input type="checkbox" value="자동차" /> 자동차</label>
+          <label class="chip"><input type="checkbox" value="에너지" /> 에너지</label>
+          <label class="chip"><input type="checkbox" value="리츠/부동산" /> 리츠/부동산</label>
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn primary" id="btn-save-prefs">투자 성향 저장</button>
+        <div id="prefs-status" class="status">저장되지 않음</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 기본 가중치 -->
+<section class="panel">
+  <h2>📊 기본 가중치 (균형형)</h2>
+  <ul class="weights-list">
+    <li>ROE: <strong>40%</strong></li>
+    <li>배당: <strong>30%</strong></li>
+    <li>PER: <strong>15%</strong></li>
+    <li>PBR: <strong>15%</strong></li>
+  </ul>
+</section>
+
+<!-- CSV 업로드 테이블 -->
+<section class="panel">
+  <h2>KOSPI 고배당 랭킹</h2>
+  <div class="row">
+    <label for="csv-file" class="btn ghost">CSV 업로드</label>
+    <input id="csv-file" type="file" accept=".csv" class="hidden" />
+    <button id="btn-download" class="btn small">현재 표 CSV로 저장</button>
+    <span id="rank-status" class="status">CSV 업로드 시 표가 렌더링됩니다</span>
+  </div>
+
+  <div class="table-wrap">
+    <table id="rank-table">
+      <thead>
+        <tr>
+          <th>종목명</th>
+          <th>점수</th>
+          <th>배당%</th>
+          <th>ROE%</th>
+          <th>PER%</th>
+          <th>PBR%</th>
+          <th>섹터</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // CSV 업로드 핸들러
+  document.getElementById('csv-file').addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      const text = event.target.result;
+      const rows = text.trim().split('\n').map(row => row.split(','));
+
+      const header = rows[0].map(h => h.trim());
+      const lowerHeader = header.map(h => h.toLowerCase());
+
+      const nameIdx = lowerHeader.indexOf('name');
+      const scoreIdx = lowerHeader.indexOf('score');
+      const divIdx = lowerHeader.indexOf('div');
+      const roeIdx = lowerHeader.indexOf('roe_est');
+      const perIdx = lowerHeader.indexOf('per');
+      const pbrIdx = lowerHeader.indexOf('pbr');
+      const sectorIdx = lowerHeader.indexOf('sector');
+
+      const tbody = document.querySelector('#rank-table tbody');
+      tbody.innerHTML = '';
+
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const tr = document.createElement('tr');
+
+        const format = (val) => {
+          const num = parseFloat(val);
+          return isNaN(num) || val === '' ? '-' : num.toFixed(2);
+        };
+
+        const cells = [
+          row[nameIdx],
+          format(row[scoreIdx]),
+          format(row[divIdx]),
+          format(row[roeIdx]),
+          format(row[perIdx]),
+          format(row[pbrIdx]),
+          row[sectorIdx]
+        ];
+
+        cells.forEach(cell => {
+          const td = document.createElement('td');
+          td.textContent = (cell ?? '').toString().trim() || '-';
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      }
+
+      const status = document.getElementById('rank-status');
+      status.textContent = '업로드 완료';
+      status.classList.add('ok');
+    };
+
+    reader.readAsText(file, 'UTF-8');
+  });
+
+  // (선택) 이미지 미리보기
+  const imageInput = document.getElementById('image-input');
+  const imagePreview = document.getElementById('image-preview');
+  if (imageInput && imagePreview) {
+    imageInput.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      imagePreview.innerHTML = `<img src="${url}" alt="미리보기" />`;
+    });
+  }
+
+  // (선택) 자기소개/성향 저장 버튼 상태 표시
+  const introBtn = document.getElementById('btn-save-intro');
+  const introStatus = document.getElementById('intro-status');
+  introBtn?.addEventListener('click', () => {
+    introStatus.textContent = '저장됨';
+    introStatus.classList.add('ok');
+  });
+
+  const prefsBtn = document.getElementById('btn-save-prefs');
+  const prefsStatus = document.getElementById('prefs-status');
+  prefsBtn?.addEventListener('click', () => {
+    prefsStatus.textContent = '저장됨';
+    prefsStatus.classList.add('ok');
+  });
+
+  // (선택) 현재 테이블을 CSV로 다운로드
+  document.getElementById('btn-download')?.addEventListener('click', () => {
+    const rows = [];
+    const table = document.getElementById('rank-table');
+    const trs = table.querySelectorAll('tr');
+    trs.forEach(tr => {
+      const cols = [...tr.children].map(td => {
+        const text = td.textContent ?? '';
+        // 쉼표/따옴표 포함 시 CSV 안전 처리를 위한 감싸기
+        if (text.includes(',') || text.includes('"')) {
+          return `"${text.replace(/"/g, '""')}"`;
+        }
+        return text;
+      });
+      rows.push(cols.join(','));
+    });
+    const csv = rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'ranking.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  });
+</script>
+{% endblock %}

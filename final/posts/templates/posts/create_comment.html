@@ -1,0 +1,12 @@
+<!-- posts/templates/posts/comment_create.html -->
+{% extends 'base.html' %}
+{% block title %}댓글 작성{% endblock %}
+{% block content %}
+  <h3>댓글 작성</h3>
+  <form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn primary" type="submit">등록</button>
+  </form>
+{% endblock %}
+
+</html>

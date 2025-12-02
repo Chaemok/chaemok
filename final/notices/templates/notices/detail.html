@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}공지사항 상세{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>{{ notice.title }}</h1>
+  <div class="muted" style="font-size:12px;">
+    {{ notice.created_at|date:"Y-m-d H:i" }}
+    {% if notice.author %} · {{ notice.author.username }}{% endif %}
+  </div>
+  <hr>
+  <div class="content">
+    {{ notice.content|linebreaks }}
+  </div>
+
+  <div style="margin-top:16px; display:flex; gap:8px;">
+    <a class="btn" href="{% url 'notices:index' %}">목록</a>
+    {% if request.user.is_staff %}
+      <a class="btn" href="{% url 'notices:update_notice' notice.id %}">수정</a>
+      <form method="post" action="{% url 'notices:delete_notice' notice.id %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger"
+          onclick="return confirm('정말 삭제할까요?');">삭제</button>
+      </form>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
