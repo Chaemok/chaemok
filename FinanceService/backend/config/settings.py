@@ -30,13 +30,7 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 VERCEL_DOMAIN = os.environ.get('VERCEL_DOMAIN', 'http://localhost:5173')
 RAILWAY_DOMAIN = os.environ.get('RAILWAY_DOMAIN', '127.0.0.1')
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-    RAILWAY_DOMAIN,
-    '.railway.app', # Railway에서 제공하는 서브 도메인 허용
-    VERCEL_DOMAIN.replace('https://', '').replace('http://', '').split('/')[0], # Vercel 도메인 허용
-]
+ALLOWED_HOSTS = ['*',]
 
 # 🚨 [수정] CORS 설정: Vercel 도메인 허용 (http/https 무관하게)
 CORS_ALLOWED_ORIGINS = [
@@ -45,6 +39,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",   # Vue 개발 서버
     "http://127.0.0.1:5173",
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True # 인증 정보(쿠키, 인증 헤더 등) 전달 허용
 
 
@@ -150,8 +146,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # 🚨 [추가] CSRF 보호 설정: Vercel 도메인을 신뢰하도록 추가 (CORS와 함께 필수)
 CSRF_TRUSTED_ORIGINS = [
-    # Vercel 도메인 (HTTPS와 HTTP를 제거한 순수 도메인만 필요)
-    VERCEL_DOMAIN.replace('https://', '').replace('http://', '').split('/')[0],
+    'https://*', # HTTPS 프로토콜의 모든 서브도메인을 신뢰
+    'http://*',  # HTTP 프로토콜의 모든 서브도메인을 신뢰
     '127.0.0.1',
     'localhost',
 ]
