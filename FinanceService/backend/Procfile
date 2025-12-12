@@ -1,9 +1,1 @@
-# [0]  마이그레이션 make.
-release: python manage.py makemigrations
-
-
-# [1] release: 서버가 켜지기 직전에 데이터베이스 마이그레이션을 단 한번 실행합니다.
-release: python manage.py migrate
-
-# [2] web: 마이그레이션이 끝난 후, 실제 서버(Gunicorn)를 켜서 인터넷에 연결합니다.
 web: gunicorn config.wsgi:application --bind 0.0.0.0
