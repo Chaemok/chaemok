@@ -90,7 +90,21 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'config.urls'
 
-# ... (TEMPLATES 설정은 그대로 유지) ...
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [], # 템플릿 경로를 명시적으로 비워둠 (앱 폴더에서 찾도록)
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug', # debug context 추가
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
