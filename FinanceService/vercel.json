@@ -1,0 +1,17 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/"
+    }
+  ],
+  "installCommand": "npm install",
+  "builds": [
+    {
+      "src": "frontend/index.html",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    }
+  ],
+  "outputDirectory": "dist"
+}

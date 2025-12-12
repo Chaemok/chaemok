@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 👇 여기부터 추가! (나만의 클래스 만들기) */
+@layer components {
+  
+  /* 1. 메인 카드 스타일 요약 */
+  .fancy-card {
+    @apply bg-white shadow-xl border border-gray-100 rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-300;
+  }
+
+  /* 2. 로그인 버튼 스타일 요약 */
+  .btn-primary-custom {
+    @apply btn bg-gray-800 text-white border-gray-700 hover:bg-gray-700 hover:border-gray-600 rounded-xl;
+  }
+  
+  /* 3. 리스트 아이템 스타일 요약 */
+  .list-item-custom {
+    @apply flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 cursor-pointer transition-colors;
+  }
+}

@@ -1,0 +1,44 @@
+# backend/accounts/models.py
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+from datetime import date
+
+class User(AbstractUser):
+    # [기본] username, password, email, first_name, last_name 포함
+    
+    # 1. 프로필 정보
+    nickname = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    name = models.CharField(max_length=30, blank=True, null=True) # 실명 (수정 불가용)
+    phone_number = models.CharField(max_length=15, blank=True, null=True) # 핸드폰 번호 추가
+    birth_date = models.DateField(blank=True, null=True) # 생년월일 (나이 계산용)
+    profile_image = models.ImageField(upload_to='profile/', blank=True, null=True) # 프로필 사진
+    
+    # 2. 금융 정보 (입력하기 싫으면 안 해도 됨 -> blank=True, null=True)
+    money = models.BigIntegerField(default=0, blank=True, null=True)  # 자산
+    salary = models.BigIntegerField(default=0, blank=True, null=True) # 연봉
+    
+    # 3. 직업군 (선택형)
+    JOB_CHOICES = [
+        ('student', '학생'),
+        ('employee', '직장인'),
+        ('civil_servant', '공무원'),
+        ('professional', '전문직'),
+        ('freelancer', '프리랜서'),
+        ('business', '사업자'),
+        ('housewife', '주부'),
+        ('unemployed', '무직'),
+        ('etc', '기타'),
+    ]
+    job = models.CharField(max_length=20, choices=JOB_CHOICES, blank=True, null=True)
+
+    # 4. 만나이 자동 계산 (DB에 저장 안 하고 필요할 때만 계산)
+    @property
+    def age(self):
+        if not self.birth_date:
+            return 0
+        today = date.today()
+        # 생일 지났으면 그대로, 안 지났으면 -1
+        return today.year - self.birth_date.year - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
+
+    def __str__(self):
+        return self.username
