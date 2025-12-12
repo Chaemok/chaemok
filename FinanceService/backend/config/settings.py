@@ -144,6 +144,19 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ... (REST_FRAMEWORK 설정은 그대로 유지) ...
+# ----------------------------------------------------
+# 5. Custom User Model 및 Allauth 설정 위, CORS 설정 아래에 추가
+# ----------------------------------------------------
+
+# 🚨 [추가] CSRF 보호 설정: Vercel 도메인을 신뢰하도록 추가 (CORS와 함께 필수)
+CSRF_TRUSTED_ORIGINS = [
+    # Vercel 도메인 (HTTPS와 HTTP를 제거한 순수 도메인만 필요)
+    VERCEL_DOMAIN.replace('https://', '').replace('http://', '').split('/')[0],
+    '127.0.0.1',
+    'localhost',
+]
+
+
 
 # ----------------------------------------------------
 # 5. Custom User Model 및 Allauth 설정
