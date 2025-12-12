@@ -34,12 +34,14 @@ ALLOWED_HOSTS = ['*',]
 
 # 🚨 [수정] CORS 설정: Vercel 도메인 허용 (http/https 무관하게)
 CORS_ALLOWED_ORIGINS = [
-    VERCEL_DOMAIN.replace('http://', 'https://'), # https:// 프론트엔드 도메인
-    VERCEL_DOMAIN.replace('https://', 'http://'), # http:// 프론트엔드 도메인
-    "http://localhost:5173",   # Vue 개발 서버
+    # 🚨 [핵심] Vercel 도메인의 끝에 있는 슬래시 ('/')를 제거합니다.
+    VERCEL_DOMAIN.rstrip('/'), 
+    VERCEL_DOMAIN.replace('https://', 'http://').rstrip('/'), 
+    
+    # 로컬 개발 환경 (슬래시 없이 유지)
+    "http://localhost:5173",   
     "http://127.0.0.1:5173",
 ]
-
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True # 인증 정보(쿠키, 인증 헤더 등) 전달 허용
 
@@ -146,12 +148,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # 🚨 [추가] CSRF 보호 설정: Vercel 도메인을 신뢰하도록 추가 (CORS와 함께 필수)
 CSRF_TRUSTED_ORIGINS = [
-    'https://*', # HTTPS 프로토콜의 모든 서브도메인을 신뢰
-    'http://*',  # HTTP 프로토콜의 모든 서브도메인을 신뢰
-    '127.0.0.1',
-    'localhost',
+    # 🚨 [핵심] 127.0.0.1과 localhost에 스킴을 붙입니다.
+    'http://127.0.0.1', 
+    'http://localhost', 
+    
+    # Vercel 도메인 (HTTPS 스킴 유지)
+    VERCEL_DOMAIN, 
+    # Vercel 도메인의 HTTP 버전 추가
+    VERCEL_DOMAIN.replace('https://', 'http://'), 
+    
+    # 와일드카드 설정 (선택 사항, 통신이 안 될 경우에만 유지)
+    'https://*', 
+    'http://*',
 ]
-
 
 
 # ----------------------------------------------------
