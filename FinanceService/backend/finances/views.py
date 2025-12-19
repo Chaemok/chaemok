@@ -15,6 +15,7 @@ from bs4 import BeautifulSoup
 import re
 from datetime import datetime, timedelta
 import FinanceDataReader as fdr
+import os
 
 # 모델 및 시리얼라이저 임포트
 # ⚠️ User는 여기서 직접 import 하지 않습니다.
@@ -25,8 +26,7 @@ from .utils import get_stock_ranking
 import traceback
 
 # API KEY 설정
-FINLIFE_API_KEY = "3c4cbc25442ea93a9a4361c35eb0cf14"
-
+FINLIFE_API_KEY = os.environ.get("FINLIFE_API_KEY", "3c4cbc25442ea93a9a4361c35eb0cf14")
 # ==========================================
 # [핵심] 내부용 데이터 수집 함수 (Deposit & Saving)
 # ==========================================
@@ -53,11 +53,11 @@ def fetch_and_save_products():
                     this_options = [o for o in option_list if o['fin_prdt_cd'] == base['fin_prdt_cd']]
                     max_rate = max([o.get('intr_rate2') or 0.0 for o in this_options]) if this_options else 0.0
                     basic_rate = this_options[0].get('intr_rate') or 0.0 if this_options else 0.0
-
+                    note = base.get('etc_note') or '기타'
                     DepositProduct.objects.create(
                         bank_name=base['kor_co_nm'],
                         product_name=base['fin_prdt_nm'],
-                        join_term=base.get('etc_note', '기타')[:50],
+                        join_term=note[:50],
                         interest_rate=basic_rate,
                         highest_rate=max_rate,
                         link_url=base.get('fin_co_hompage', '')
@@ -82,11 +82,13 @@ def fetch_and_save_products():
                     this_options = [o for o in option_list if o['fin_prdt_cd'] == base['fin_prdt_cd']]
                     max_rate = max([o.get('intr_rate2') or 0.0 for o in this_options]) if this_options else 0.0
                     basic_rate = this_options[0].get('intr_rate') or 0.0 if this_options else 0.0
-
+                    
+                    note = base.get('etc_note') or '기타'
+                    
                     SavingProduct.objects.create(
                         bank_name=base['kor_co_nm'],
                         product_name=base['fin_prdt_nm'],
-                        join_term=base.get('etc_note', '기타')[:50],
+                        join_term=note[:50],
                         interest_rate=basic_rate,
                         highest_rate=max_rate,
                         link_url=base.get('fin_co_hompage', '')
@@ -107,12 +109,16 @@ class DepositProductListAPIView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
-        if not DepositProduct.objects.exists():
-            fetch_and_save_products()
-        
-        products = DepositProduct.objects.all().order_by('-highest_rate')
-        serializer = DepositProductSerializer(products, many=True)
-        return Response(serializer.data)
+        try:
+            if not DepositProduct.objects.exists():
+                fetch_and_save_products()
+            
+            products = DepositProduct.objects.all().order_by('-highest_rate')
+            serializer = DepositProductSerializer(products, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            # 🚨 500 에러 대신 구체적인 에러 내용을 반환해서 확인
+            return Response({"error": str(e)}, status=500)
 
 
 # ==========================================
