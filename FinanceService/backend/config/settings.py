@@ -75,6 +75,8 @@ INSTALLED_APPS = [
     'accounts',
     'community',
     'finlife',
+    'ai_analysis',
+    'map',
 ]
 
 SITE_ID = 1
@@ -188,6 +190,31 @@ ACCOUNT_EMAIL_REQUIRED = False
 APPEND_SLASH = True
 
 REST_AUTH = {
-    'USER_DETAILS_SERIALIZER': 'accounts.serializers.CustomUserDetailsSerializer',
     'REGISTER_SERIALIZER': 'accounts.serializers.CustomRegisterSerializer',
+    'USER_DETAILS_SERIALIZER': 'accounts.serializers.CustomUserDetailsSerializer',
+    'USE_JWT': False, # 토큰 방식에 따라 설정 (현재는 기본 Token 사용 중)
 }
+# ----------------------------------------------------
+# 6. REST Framework 설정 (403 에러 해결의 핵심)
+# ----------------------------------------------------
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        # 🐜 토큰 기반 인증을 기본으로 설정 (이게 없으면 403 Forbidden 발생)
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        # 기본적으로 인증된 사용자만 접근 가능하도록 설정 (필요에 따라 변경 가능)
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+# ----------------------------------------------------
+# 7. Authentication Backends (Allauth 연동)
+# ----------------------------------------------------
+AUTHENTICATION_BACKENDS = [
+    # Django 기본 인증
+    'django.contrib.auth.backends.ModelBackend',
+    # allauth를 통한 인증 (dj-rest-auth와 함께 필수)
+    'allauth.account.auth_backends.AuthenticationBackend',
+]

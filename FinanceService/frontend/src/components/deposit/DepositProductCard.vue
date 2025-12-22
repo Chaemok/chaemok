@@ -1,15 +1,14 @@
 <script setup>
-// 부모로부터 상품 객체를 넘겨받음
-const props = defineProps({
-  product: {
-    type: Object,
-    required: true
-  }
+defineProps({
+  product: { type: Object, required: true }
 })
+// 부모에게 클릭되었음을 알리는 emit 설정
+defineEmits(['click'])
 </script>
 
 <template>
-  <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-50 hover:border-primary hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group flex flex-col justify-between h-full">
+  <div @click="$emit('click')" 
+       class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-50 hover:border-indigo-500 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group flex flex-col justify-between h-full">
     <div>
       <div class="flex justify-between items-start mb-4">
         <span class="px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-black rounded-lg uppercase">
@@ -17,8 +16,7 @@ const props = defineProps({
         </span>
         <span class="text-xl group-hover:scale-110 transition-transform">🐜</span>
       </div>
-      
-      <h3 class="text-xl font-black text-slate-800 leading-tight mb-6 group-hover:text-primary transition-colors">
+      <h3 class="text-xl font-black text-slate-800 leading-tight mb-6 group-hover:text-indigo-600 transition-colors">
         {{ product.fin_prdt_nm }}
       </h3>
     </div>
@@ -31,8 +29,8 @@ const props = defineProps({
         </p>
       </div>
       <div class="text-right">
-        <p class="text-[10px] font-bold text-primary mb-1 uppercase">최고 금리</p>
-        <p class="text-2xl font-black text-primary">
+        <p class="text-[10px] font-bold text-indigo-500 mb-1 uppercase">최고 금리</p>
+        <p class="text-2xl font-black text-indigo-600">
           {{ product.max_intr_rate || '0' }}%
         </p>
       </div>

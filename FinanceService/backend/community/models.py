@@ -2,9 +2,7 @@
 from django.db import models
 from django.conf import settings
 
-# 1. 게시글 모델
 class Post(models.Model):
-    # 게시판 카테고리
     CATEGORY_CHOICES = [
         ('inquiry', '1:1 문의'),
         ('free', '자유게시판'),
@@ -14,16 +12,18 @@ class Post(models.Model):
         ('faq', 'FAQ'),
     ]
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posts')
+    # 🐜 [수정] 이 필드가 없어서 필터링이 안 됐던 거야!
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='free') 
     title = models.CharField(max_length=100)
     content = models.TextField()
-    is_secret = models.BooleanField(default=False) #비밀글
+    is_secret = models.BooleanField(default=False)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # [추가] 좋아요 & 싫어요 기능
     like_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='like_posts', blank=True)
     dislike_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='dislike_posts', blank=True)
+
     def __str__(self):
         return self.title
 

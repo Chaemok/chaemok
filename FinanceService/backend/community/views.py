@@ -5,13 +5,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsOwnerOrAdminReadOnly
 
 
 # ViewSet을 사용하면 CRUD 로직을 한 번에 처리할 수 있어 효율적이야
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminReadOnly]
 
     def get_queryset(self):
         user = self.request.user
@@ -72,7 +72,7 @@ class PostViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminReadOnly]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

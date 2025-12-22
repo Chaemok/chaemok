@@ -25,18 +25,9 @@ const router = createRouter({
     { path: '/map', name: 'map', component: () => import('@/views/Map/MapView.vue') },
 
     // [User]
-    {
-      path: '/profile',
-      name: 'profile',
-      component: () => import('@/views/User/ProfileView.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/profile/edit',
-      name: 'profile-edit',
-      component: () => import('@/views/User/ProfileEditView.vue'),
-      meta: { requiresAuth: true }
-    },
+    { path: '/mypage', name: 'mypage', component: () => import('@/views/User/MyPageView.vue') }, // 대시보드
+    { path: '/profile', name: 'profile-detail', component: () => import('@/views/User/ProfileView.vue') }, // 상세 (비번확인)
+    { path: '/profile/edit', name: 'profile-edit', component: () => import('@/views/User/ProfileEditView.vue') }, // 수정
     {
       path: '/profile/password',
       name: 'password-change',
@@ -45,22 +36,10 @@ const router = createRouter({
     },
 
     // [Community]
-    {
-      path: '/community',
-      name: 'community',
-      component: () => import('@/views/Community/CommunityView.vue')
-    },
-    {
-      path: '/community/create',
-      name: 'post-create',
-      component: () => import('@/views/Community/PostCreateView.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/community/:id',
-      name: 'post-detail',
-      component: () => import('@/views/Community/PostDetailView.vue'),
-    }
+    { path: '/community', name: 'community', component: () => import('@/views/Community/CommunityView.vue') },
+    { path: '/community/create', name: 'post-create', component: () => import('@/views/Community/PostCreateView.vue'), meta: { requiresAuth: true } },
+    { path: '/community/:id', name: 'post-detail', component: () => import('@/views/Community/PostDetailView.vue'), },
+    { path: '/community/:id/edit', name: 'post-edit', component: () => import('@/views/community/PostEditView.vue'), meta: { requiresAuth: true } }
   ]
 })
 

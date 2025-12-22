@@ -22,14 +22,14 @@ from .serializers import (
     DepositProductSerializer, SavingProductSerializer, 
     ExchangeRateSerializer, JoinedDepositOptionSerializer
 )
-from .utils import get_stock_ranking
+from .utils.external_api import get_kis_data, get_gold_silver_price
+from .utils.quant_analysis import get_stock_ranking
 
 # API KEY 설정
 FINLIFE_API_KEY = getattr(settings, 'FINLIFE_API_KEY', "3c4cbc25442ea93a9a4361c35eb0cf14")
 EXIM_API_KEY = getattr(settings, 'EXIM_API_KEY', "VMyu0svCx0AhAHQms9zCgdFuWrfIUFiu")
 NAVER_CLIENT_ID = getattr(settings, 'NAVER_CLIENT_ID', "HuqovM0XqQzKa7kMeYBb")
 NAVER_CLIENT_SECRET = getattr(settings, 'NAVER_CLIENT_SECRET', "dnwCJRQx3i")
-KAKAO_MAP_API_KEY = getattr(settings, 'KAKAO_MAP_API_KEY', '발급받은키')
 
 # ==========================================
 # [데이터 수집] 예적금 정보 저장
@@ -177,25 +177,26 @@ def finance_news_view(request):
         return Response(cleaned)
     except: return Response({"error": "News failed"}, status=500)
 
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def map_search_proxy(request):
-    search_type = request.GET.get('type', 'bank')
-    query = request.GET.get('query', '')
-    url = "https://dapi.kakao.com/v2/local/search/keyword.json"
-    headers = {"Authorization": f"KakaoAK {KAKAO_MAP_API_KEY}"}
-    params = {
-        "query": f"{query} {search_type}".strip(),
-        "x": request.GET.get('lng'), "y": request.GET.get('lat'),
-        "radius": 2000, "sort": "distance"
-    }
-    if search_type == 'bank': params['category_group_code'] = 'BK9'
-    try: return Response(requests.get(url, headers=headers, params=params).json())
-    except: return Response({"error": "Map search failed"}, status=500)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def get_bank_products(request):
     bank_name = request.GET.get('bank_name', '')
     clean_name = bank_name.replace("KB", "").replace("NH", "").split()[0] 
     products = DepositProduct.objects.filter(kor_co_nm__contains=clean_name)[:3]
     return Response(DepositProductSerializer(products, many=True).data)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_stock_detail(request):
+    """
+    🐜 검색용 API: /api/finlife/stock-detail/?code=005930
+    """
+    code = request.GET.get('code')
+    is_index = request.GET.get('type') == 'index'
+    
+    if not code:
+        return Response({"error": "종목 코드가 필요합니다."}, status=400)
+        
+    data = get_kis_data(code, is_index=is_index)
+    return Response(data)

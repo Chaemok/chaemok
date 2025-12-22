@@ -20,4 +20,6 @@ urlpatterns = [
     path("api/accounts/", include("accounts.urls")),
     path("api/community/", include("community.urls")),
     path("api/finlife/", include("finlife.urls")),
+    path('api/ai/', include('ai_analysis.urls')),
+    path('api/map/', include('map.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

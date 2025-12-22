@@ -1,15 +1,28 @@
 <script setup>
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import AuthLayout from '@/components/auth/AuthLayout.vue'
 import SignupForm from '@/components/auth/SignupForm.vue'
+import WelcomeModal from '@/components/auth/WelcomeModal.vue' // 🐜 컴포넌트 호출
 
 const router = useRouter()
 const authStore = useAuthStore()
+const showWelcomeModal = ref(false)
 
 const handleSignup = async (userData) => {
-  const success = await authStore.signup(userData)
-  if (success) router.push('/login')
+  try {
+    // 🐜 가입과 동시에 스토어에서 자동으로 토큰 저장(로그인)이 일어남
+    await authStore.signup(userData)
+    showWelcomeModal.value = true
+  } catch (err) {
+    console.error('가입 실패:', err)
+  }
+}
+
+const goToHome = () => {
+  showWelcomeModal.value = false
+  router.push({ name: 'home' })
 }
 </script>
 
@@ -18,10 +31,8 @@ const handleSignup = async (userData) => {
     <template #title>새로운 개미가 되어보세요 🐜</template>
     <template #form>
       <SignupForm @submit="handleSignup" />
-      <p class="mt-8 text-center text-sm text-slate-400 font-medium">
-        이미 계정이 있나요? 
-        <router-link to="/login" class="text-primary font-bold hover:underline">로그인</router-link>
-      </p>
     </template>
   </AuthLayout>
+
+  <WelcomeModal :isOpen="showWelcomeModal" @confirm="goToHome" />
 </template>

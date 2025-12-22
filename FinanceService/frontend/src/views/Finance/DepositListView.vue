@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useFinanceStore } from '@/stores/finance'
 
-// 🐜 컴포넌트 구조화 (Hana-Free 스타일)
+// 컴포넌트 임포트
 import DepositFilter from '@/components/deposit/DepositFilter.vue'
 import DepositProductCard from '@/components/deposit/DepositProductCard.vue'
 import DepositDetailModal from '@/components/deposit/DepositDetailModal.vue'
@@ -15,7 +15,7 @@ const store = useFinanceStore()
 // -- 상태 관리 --
 const isLoading = ref(true)
 const selectedType = ref('deposit') 
-const selectedSector = ref('all') // 전체, 1금융, 2금융
+const selectedSector = ref('all') 
 const selectedBank = ref('전체')
 const searchQuery = ref('')
 const sortBy = ref('rate')
@@ -24,14 +24,13 @@ const sortBy = ref('rate')
 const currentPage = ref(1)
 const itemsPerPage = 12
 
-// 모달 상태
+// ✨ [핵심] 모달 상태 및 선택된 상품 데이터
 const isModalOpen = ref(false)
 const selectedProduct = ref(null)
 
 onMounted(async () => {
   try {
     isLoading.value = true
-    // 🐜 [동기화] 스토어에 새로 만든 함수들 호출
     await Promise.all([
       store.getDepositProducts(), 
       store.getSavingProducts()
@@ -45,7 +44,6 @@ onMounted(async () => {
 
 // -- 1. 데이터 소스 결정 --
 const currentSourceProducts = computed(() => {
-  // selectedType이 'deposit'이면 store.depositProducts를, 아니면 savingProducts를 사용
   return selectedType.value === 'deposit' 
     ? (store.depositProducts || []) 
     : (store.savingProducts || [])
@@ -54,36 +52,22 @@ const currentSourceProducts = computed(() => {
 // -- 2. 은행 목록 동적 추출 --
 const bankNames = computed(() => {
   let source = currentSourceProducts.value
-  
-  // 1) 금융권 필터링
   if (selectedSector.value === 'bank') {
     source = source.filter(p => !p.kor_co_nm.includes('저축은행'))
   } else if (selectedSector.value === 'savings') {
     source = source.filter(p => p.kor_co_nm.includes('저축은행'))
   }
-  
-  // 2) 중복을 제거한 은행 이름들을 배열로 변환
   const namesArray = Array.from(new Set(source.map(p => p.kor_co_nm)))
-  
-  // 3) 은행 이름들만 '먼저' 가나다순으로 정렬 (sort는 원본을 변경함)
   namesArray.sort()
-  
-  // 4) [중요] 정렬된 리스트 맨 앞에 '전체'를 수동으로 삽입
   return ['전체', ...namesArray]
 })
 
 // -- 3. 필터링 및 정렬 로직 --
 const finalProducts = computed(() => {
   let result = currentSourceProducts.value
-
-  // 금융권 필터
   if (selectedSector.value === 'bank') result = result.filter(p => !p.kor_co_nm.includes('저축은행'))
   else if (selectedSector.value === 'savings') result = result.filter(p => p.kor_co_nm.includes('저축은행'))
-
-  // 은행 필터
   if (selectedBank.value !== '전체') result = result.filter(p => p.kor_co_nm === selectedBank.value)
-
-  // 검색 필터
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     result = result.filter(p => 
@@ -91,8 +75,6 @@ const finalProducts = computed(() => {
       p.kor_co_nm.toLowerCase().includes(query)
     )
   }
-
-  // 정렬 (금리순/이름순)
   return [...result].sort((a, b) => {
     if (sortBy.value === 'rate') return (b.max_intr_rate || 0) - (a.max_intr_rate || 0)
     return a.fin_prdt_nm.localeCompare(b.fin_prdt_nm)
@@ -111,12 +93,11 @@ const handlePageChange = (page) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-// 필터 변경 시 1페이지로 리셋
 watch([selectedType, selectedSector, selectedBank, searchQuery, sortBy], () => {
   currentPage.value = 1
 })
 
-// -- 모달 핸들러 --
+// ✨ [핵심] 모달 핸들러 함수
 const openDetailModal = (product) => {
   selectedProduct.value = product
   isModalOpen.value = true
@@ -138,14 +119,14 @@ const closeDetailModal = () => {
       />
 
       <div class="flex justify-center">
-        <div class="flex bg-slate-200/50 p-1.5 rounded-[2rem] w-full max-w-sm">
+        <div class="flex bg-slate-200/50 p-1.5 rounded-[2rem] w-full max-w-sm border border-slate-200">
           <button @click="selectedType = 'deposit'"
-                  :class="selectedType === 'deposit' ? 'bg-white text-primary shadow-md' : 'text-slate-500'"
+                  :class="selectedType === 'deposit' ? 'bg-white text-indigo-600 shadow-md' : 'text-slate-500'"
                   class="flex-1 py-3 text-lg font-black rounded-[1.8rem] transition-all">
             예금
           </button>
           <button @click="selectedType = 'saving'"
-                  :class="selectedType === 'saving' ? 'bg-white text-primary shadow-md' : 'text-slate-500'"
+                  :class="selectedType === 'saving' ? 'bg-white text-indigo-600 shadow-md' : 'text-slate-500'"
                   class="flex-1 py-3 text-lg font-black rounded-[1.8rem] transition-all">
             적금
           </button>
@@ -153,7 +134,7 @@ const closeDetailModal = () => {
       </div>
 
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-32">
-        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <span class="loading loading-spinner loading-lg text-indigo-600"></span>
         <p class="mt-4 text-slate-400 font-bold">금융 상품 정보를 분석 중입니다... 🐜</p>
       </div>
 
@@ -187,18 +168,15 @@ const closeDetailModal = () => {
     </div>
 
     <DepositDetailModal 
-      v-if="selectedProduct"
-      :product="selectedProduct"
       :is-open="isModalOpen"
+      :product="selectedProduct"
       @close="closeDetailModal"
     />
   </div>
 </template>
 
 <style scoped>
-.animate-fade-in-up {
-  animation: fadeInUp 0.5s ease-out forwards;
-}
+.animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }

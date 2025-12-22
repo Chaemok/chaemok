@@ -13,11 +13,11 @@ urlpatterns = [
     path('deposits/join/<int:option_pk>/', views.join_deposit_option, name='join_deposit'),
     path('deposits/recommend/', views.recommend_products, name='recommend_products'),
     path('joined-products/', views.joined_products, name='joined_products'),
-    path('stocks/recommend/', views.recommend_stocks, name='recommend_stocks'),
+    path('recommend-stocks/', views.recommend_stocks, name='recommend_stocks'),
     
     # 외부 API 연동 (Function-based)
     path('exchange-rate/', views.exchange_rate, name='exchange_rate'),
     path('news/', views.finance_news_view, name='finance_news'),
-    path('map-search/', views.map_search_proxy, name='map_search'),
     path('bank-products/', views.get_bank_products, name='bank_products'),
+    path('market-status/', views.get_market_status, name='market_status'),
 ]
