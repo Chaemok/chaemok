@@ -1,99 +1,79 @@
 <script setup>
-import { onMounted, computed } from 'vue'
+import { onMounted } from 'vue'
 import { useFinanceStore } from '@/stores/finance'
 import { useAuthStore } from '@/stores/auth'
 
+// 컴포넌트 임포트
 import HomeHero from '@/components/home/HomeHero.vue'
+import HomeMarketTicker from '@/components/home/HomeMarketTicker.vue'
 import HomeQuickMenu from '@/components/home/HomeQuickMenu.vue'
-import HomeStatCard from '@/components/home/HomeStatCard.vue'
 import HomeRecommend from '@/components/home/HomeRecommend.vue'
 import HomeNewsFeed from '@/components/home/HomeNewsFeed.vue'
 
 const financeStore = useFinanceStore()
 const authStore = useAuthStore()
 
-const usdRate = computed(() => financeStore.getExchangeRate('USD'))
-
 onMounted(async () => {
+  // 메인 데이터 로드
   await financeStore.fetchQuickData()
-  if (authStore.isLoggedIn) {
-    financeStore.fetchRecommendations()
+  if (financeStore.fetchMarketStatus) { 
+    await financeStore.fetchMarketStatus() 
+  }
+  // 로그인 상태일 때만 추천 데이터 호출
+  if (authStore.isLoggedIn) { 
+    financeStore.fetchRecommendations() 
   }
 })
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50">
-    <header class="relative w-full shadow-xl z-0">
+  <div class="min-h-screen bg-slate-50 font-pretendard">
+    <header class="relative w-full h-[500px] md:h-[650px] overflow-hidden shadow-xl z-10">
       <HomeHero />
+      <HomeMarketTicker />
     </header>
 
-    <main class="max-w-6xl mx-auto px-6 -mt-40 pb-32 space-y-16 relative z-10">
+    <main class="max-w-6xl mx-auto px-4 md:px-6 py-20 space-y-24 relative z-0">
       
-      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <HomeStatCard 
-          title="미국 달러" 
-          :value="usdRate?.deal_bas_r || '1,478.6'" 
-          unit="KRW" 
-          icon="💵" 
-          :loading="financeStore.isMainLoading"
-        />
-
-        <HomeStatCard 
-          title="국제 금시세" 
-          :value="financeStore.marketData.metal?.gold" 
-          unit="USD/oz" 
-          icon="✨" 
-          :loading="financeStore.isMarketLoading"
-        />
-
-        <HomeStatCard 
-          title="코스피 지수" 
-          :value="financeStore.marketData.kospi" 
-          unit="pts" 
-          icon="📊" 
-          :loading="financeStore.isMarketLoading"
-        />
-
-        <HomeStatCard 
-          title="삼성전자" 
-          :value="financeStore.marketData.stock?.value" 
-          unit="원" 
-          icon="🐜" 
-          :loading="financeStore.isMarketLoading"
-        />
-      </section>
-
-      <section class="bg-white rounded-[3.5rem] p-12 shadow-xl shadow-slate-200/50 border border-white">
-        <div class="flex items-center gap-3 mb-10">
-          <span class="text-2xl">⚡️</span>
-          <h3 class="text-2xl font-black text-slate-800 tracking-tighter">빠른 서비스</h3>
-        </div>
-        <HomeQuickMenu />
-      </section>
-
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        
         <div class="lg:col-span-2 space-y-6">
-          <div class="flex items-center justify-between px-4">
-            <h3 class="text-2xl font-black text-slate-900 tracking-tighter">나를 위한 맞춤 금융 ✨</h3>
-            <router-link to="/deposit" class="text-sm font-bold text-blue-600">전체보기</router-link>
+          <div class="flex items-center gap-3 px-2">
+            <span class="bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-black shadow-lg shadow-blue-200">NEWS</span>
+            <h3 class="text-2xl font-black text-slate-900 tracking-tight">금융 헤드라인 📰</h3>
           </div>
-          <div class="bg-white rounded-[3.5rem] p-10 shadow-xl shadow-slate-200/50 border border-white">
-            <HomeRecommend :items="financeStore.recommendations" :isLoading="financeStore.isRecLoading" />
+          <div class="bg-white rounded-[2.5rem] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
+            <HomeNewsFeed :news="financeStore.news" :isLoading="financeStore.isMainLoading" />
           </div>
         </div>
 
         <div class="space-y-6">
-          <div class="px-4">
-            <h3 class="text-2xl font-black text-slate-900 tracking-tighter">실시간 뉴스 📰</h3>
+          <h3 class="text-2xl font-black text-slate-900 tracking-tight px-2">인기 상품 🔥</h3>
+          <div class="bg-white rounded-[2.5rem] p-8 shadow-xl border border-blue-50">
+            <ul class="space-y-6">
+              <li v-for="i in 3" :key="i" class="flex items-center gap-4 group cursor-pointer">
+                <span class="text-xl font-black text-blue-600">0{{ i }}</span>
+                <div>
+                  <p class="text-xs text-slate-400 font-bold">KB국민은행</p>
+                  <p class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">KB Star 정기예금</p>
+                </div>
+              </li>
+            </ul>
+            <button class="w-full mt-8 py-4 bg-slate-50 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors">전체보기</button>
           </div>
-          <HomeNewsFeed :news="financeStore.news" :isLoading="financeStore.isMainLoading" />
         </div>
       </div>
+
+      <section class="space-y-8 pb-10">
+        <h3 class="text-2xl font-black text-slate-900 tracking-tight px-6">나를 위한 맞춤 추천 ✨</h3>
+        <div class="bg-white rounded-[3.5rem] p-10 shadow-xl border border-slate-100">
+          <HomeRecommend :items="financeStore.recommendations" :isLoading="financeStore.isRecLoading" />
+        </div>
+      </section>
     </main>
   </div>
 </template>
 
 <style scoped>
-.tracking-tighter { letter-spacing: -0.05em; }
+.tracking-tight { letter-spacing: -0.025em; }
 </style>

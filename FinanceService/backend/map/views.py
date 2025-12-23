@@ -1,38 +1,48 @@
-# map/views.py 전체 코드
+# map/views.py
 import requests
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import AllowAny
 
-# 🐜 카카오 REST API 키
+# 🐜 본인의 API 키인지 꼭 확인!
 KAKAO_REST_KEY = '676d89680b40b5e9fa41b47be77242ab'
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
+@authentication_classes([])
 def map_search(request):
-    """주변 금융기관 검색 (카카오 규격 15개 제한 적용)"""
-    query = request.GET.get('query')
-    lat = request.GET.get('lat')
-    lng = request.GET.get('lng')
+    query = request.GET.get('query', '은행')
+    rect = request.GET.get('rect') # 프론트에서 보낸 영역값
     
     url = "https://dapi.kakao.com/v2/local/search/keyword.json"
     headers = {"Authorization": f"KakaoAK {KAKAO_REST_KEY}"}
     
     params = {
         "query": query,
-        "x": lng,
-        "y": lat,
-        "radius": 20000, 
-        # 🐜 [수정] 카카오 API 최대 허용치인 15로 변경 (400 에러 해결)
         "size": 15,
-        "sort": "distance"
+        "sort": "distance",
+        "category_group_code": "BK9" if "은행" in query else ""
     }
-    
+
+    # 🐜 영역 검색(rect) 데이터가 있으면 우선 적용
+    if rect:
+        params["rect"] = rect
+    else:
+        # rect가 없을 때만 좌표 기준 검색
+        params["y"] = request.GET.get('lat', '37.5215')
+        params["x"] = request.GET.get('lng', '126.9243')
+        params["radius"] = 5000
+
     try:
         res = requests.get(url, headers=headers, params=params)
+        # 🐜 검색 실패 시 카카오가 준 에러를 그대로 반환해서 디버깅 도와줌
         return Response(res.json())
     except Exception as e:
         return Response({"error": str(e)}, status=500)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
+@authentication_classes([])
 def get_route(request):
     """길찾기 경로 좌표 반환"""
     origin = request.GET.get('origin')

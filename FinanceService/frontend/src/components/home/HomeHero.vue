@@ -2,136 +2,137 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 
 const slides = [
-  {
+  { 
     id: 1,
-    title: "똑똑한 개미들의",
-    highlight: "데이터 금융 놀이터",
-    description: "흩어진 내 자산 정보를 한눈에 확인하고,\n최적의 금융 전략을 AI로 분석받으세요. 🐜",
-    image: "/src/assets/hero-bg-1.jpg", 
-    label: "Smart Financial Intelligence"
+    title: "최고 금리\n예적금 찾기 💰", 
+    sub: "은행별 금리 비교부터 나에게 딱 맞는 상품 검색까지.", 
+    img: 'hero-bg-1.jpg',
+    path: '/deposit',
+    btnText: '상품 보러가기'
   },
-  {
+  { 
     id: 2,
-    title: "가장 가까운",
-    highlight: "전국 은행/증권사 찾기",
-    description: "내 위치 기반으로 가장 빠르게 방문 가능한\n금융 기관과 최적의 경로를 안내합니다. 📍",
-    image: "/src/assets/hero-bg-2.jpg", 
-    label: "Location Based Service"
+    title: "실시간\n환율 정보 확인 💱", 
+    sub: "오늘의 환율을 지금 바로 확인하세요.", 
+    img: 'hero-bg-2.jpg',
+    path: '/exchange-rate',
+    btnText: '환율 계산기'
   },
-  {
+  { 
     id: 3,
-    title: "나만을 위한",
-    highlight: "맞춤형 예적금 추천",
-    description: "복잡한 금리 비교는 이제 그만,\n나의 자산 상황에 딱 맞는 상품을 골라드려요. ✨",
-    image: "/src/assets/hero-bg-3.jpg", 
-    label: "Personalized Curation"
+    title: "글로벌\n시장 지표 분석 📈", 
+    sub: "나스닥, 코스피 등 전 세계 시장의 흐름을 한눈에.", 
+    img: 'hero-bg-3.jpg',
+    path: '/market',
+    btnText: '시장지표 상세'
+  },
+  { 
+    id: 4,
+    title: "Smart Ants가 추천하는 \n 주식 종목 추천 🤖", 
+    sub: "데이터 분석으로 찾는 유망 종목.", 
+    img: 'hero-bg-4.jpg',
+    path: '/recommend',
+    btnText: '주식 추천받기'
+  },
+  { 
+    id: 5,
+    title: "실시간\n금융 뉴스 📰", 
+    sub: "가장 빠르게 전달되는 오늘의 핵심 경제 소식.", 
+    img: 'hero-bg-5.jpg',
+    path: '/news',
+    btnText: '뉴스 더보기'
   }
 ]
 
 const currentSlide = ref(0)
-let timer = null
+let slideTimer = null
 
 const nextSlide = () => {
   currentSlide.value = (currentSlide.value + 1) % slides.length
+  resetTimer()
 }
 
-const startTimer = () => {
-  stopTimer()
-  timer = setInterval(nextSlide, 5000)
+const prevSlide = () => {
+  currentSlide.value = (currentSlide.value - 1 + slides.length) % slides.length
+  resetTimer()
 }
 
-const stopTimer = () => {
-  if (timer) clearInterval(timer)
+const resetTimer = () => {
+  if (slideTimer) clearInterval(slideTimer)
+  slideTimer = setInterval(nextSlide, 6000)
 }
 
-onMounted(() => startTimer())
-onUnmounted(() => stopTimer())
+const getImageUrl = (name) => {
+  return new URL(`../../assets/${name}`, import.meta.url).href
+}
+
+onMounted(() => resetTimer())
+onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
 </script>
 
 <template>
-  <div class="relative w-full min-h-[750px] flex items-center justify-center overflow-hidden bg-transparent">
+  <div class="relative w-full h-full overflow-hidden text-white bg-slate-950 font-pretendard">
     
-    <transition-group name="bg-slide">
-      <div v-for="(slide, index) in slides" :key="'bg-' + slide.id" 
-           v-show="currentSlide === index"
-           class="absolute inset-0 z-0">
-        <img :src="slide.image" class="w-full h-full object-cover zoom-animation" />
-        <div class="absolute inset-0 bg-gradient-to-b from-blue-950/90 via-blue-900/40 to-transparent"></div>
-      </div>
-    </transition-group>
-
-    <transition-group name="content-slide">
-      <div v-for="(slide, index) in slides" :key="'content-' + slide.id"
-           v-show="currentSlide === index"
-           class="absolute inset-0 flex items-center justify-center z-10">
-        
-        <div class="text-center space-y-8 px-4 pb-20 max-w-4xl mx-auto">
-          <div class="stagger-1 inline-block px-4 py-1.5 bg-blue-500/20 rounded-full backdrop-blur-md border border-white/10">
-            <span class="text-blue-200 text-[10px] font-black tracking-[0.3em] uppercase">{{ slide.label }}</span>
-          </div>
-          
-          <h1 class="stagger-2 text-5xl md:text-7xl font-black text-white leading-[1.1] tracking-tighter">
-            {{ slide.title }}<br/>
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">
-              {{ slide.highlight }}
-            </span>
-          </h1>
-          
-          <p class="stagger-3 text-white/70 text-lg md:text-xl font-medium leading-relaxed whitespace-pre-line">
-            {{ slide.description }}
-          </p>
-
-          <div class="stagger-4 pt-8 flex flex-wrap items-center justify-center gap-4">
-            <button class="px-10 py-5 bg-white text-blue-950 rounded-2xl font-black shadow-2xl hover:scale-105 active:scale-95 transition-all">
-              {{ index === 1 ? '지도 바로가기' : '내 자산 분석하기' }}
-            </button>
-            <button class="px-10 py-5 bg-white/10 text-white rounded-2xl font-black backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all">
-              가이드 보기
-            </button>
-          </div>
+    <Transition name="fade" mode="out-in">
+      <div :key="currentSlide" class="absolute inset-0">
+        <div class="absolute inset-0 bg-cover bg-center animate-subtle-zoom"
+             :style="{ backgroundImage: `url(${getImageUrl(slides[currentSlide].img)})` }">
         </div>
+        <div class="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-900/50 to-transparent"></div>
       </div>
-    </transition-group>
+    </Transition>
 
-    <div class="absolute bottom-48 left-1/2 -translate-x-1/2 z-20 flex gap-3">
-      <button v-for="(_, index) in slides" :key="index"
-              @click="currentSlide = index; startTimer();"
-              class="w-2.5 h-2.5 rounded-full transition-all duration-500"
-              :class="currentSlide === index ? 'bg-white w-8' : 'bg-white/30'"></button>
+    <div class="max-w-6xl mx-auto px-6 h-full flex flex-col justify-center relative z-20">
+      <Transition name="slide-fade" mode="out-in">
+        <div :key="currentSlide" class="max-w-2xl space-y-8">
+          <h1 class="text-4xl md:text-6xl font-extrabold leading-tight tracking-tight drop-shadow-2xl">
+            {{ slides[currentSlide].title }}
+          </h1>
+          <p class="text-lg md:text-xl text-white/80 font-medium max-w-lg">
+            {{ slides[currentSlide].sub }}
+          </p>
+          
+          <router-link :to="slides[currentSlide].path" 
+             class="group inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-full font-bold text-sm hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all duration-300 transform hover:-translate-y-1">
+            {{ slides[currentSlide].btnText }}
+            <span class="group-hover:translate-x-1 transition-transform">→</span>
+          </router-link>
+        </div>
+      </Transition>
+    </div>
+
+    <button @click="prevSlide" class="absolute left-6 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/20 transition-all border border-white/10 hidden md:block">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+    </button>
+    <button @click="nextSlide" class="absolute right-6 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/20 transition-all border border-white/10 hidden md:block">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+    </button>
+
+    <div class="absolute bottom-24 left-1/2 -translate-x-1/2 flex gap-3 z-30">
+      <div v-for="(_, index) in slides" :key="index"
+           @click="currentSlide = index"
+           :class="['h-1.5 transition-all duration-500 rounded-full cursor-pointer', 
+                    index === currentSlide ? 'w-10 bg-white' : 'w-2 bg-white/30 hover:bg-white/50']">
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.zoom-animation { animation: slowZoom 20s infinite alternate ease-in-out; }
-@keyframes slowZoom {
-  from { transform: scale(1.05); }
-  to { transform: scale(1.15); }
+/* 🐜 배경 페이드 애니메이션 */
+.fade-enter-active, .fade-leave-active { transition: opacity 1s ease-in-out; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+/* 🐜 텍스트 슬라이드 애니메이션 */
+.slide-fade-enter-active { transition: all 0.6s ease-out; }
+.slide-fade-leave-active { transition: all 0.4s ease-in; }
+.slide-fade-enter-from { opacity: 0; transform: translateX(30px); }
+.slide-fade-leave-to { opacity: 0; transform: translateX(-20px); }
+
+/* 🐜 은은한 줌인 효과 */
+@keyframes subtle-zoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
 }
-
-/* =========================================
-   🐜 다이나믹 슬라이드 애니메이션 (이거임!)
-========================================= */
-
-/* 배경: 부드러운 페이드 + 살짝 움직임 */
-.bg-slide-enter-active, .bg-slide-leave-active { transition: opacity 1.5s ease, transform 1.5s ease; }
-.bg-slide-enter-from { opacity: 0; transform: scale(1.1); }
-.bg-slide-leave-to { opacity: 0; transform: scale(0.95); }
-
-/* 컨텐츠: 오른쪽에서 들어오고 왼쪽으로 나가는 다이나믹 슬라이드 */
-.content-slide-enter-active { transition: all 1s cubic-bezier(0.23, 1, 0.32, 1); }
-.content-slide-leave-active { transition: all 0.8s cubic-bezier(0.75, 0, 0.175, 1); }
-
-/* 들어올 때: 오른쪽에서 80px 떨어진 곳에서 스르륵 */
-.content-slide-enter-from { opacity: 0; transform: translateX(80px); }
-/* 나갈 때: 왼쪽으로 80px 밀려나며 사라짐 */
-.content-slide-leave-to { opacity: 0; transform: translateX(-80px); }
-
-/* 🐜 개별 요소 시차(Stagger) 효과 */
-.content-slide-enter-active .stagger-1 { transition-delay: 0.1s; }
-.content-slide-enter-active .stagger-2 { transition-delay: 0.2s; }
-.content-slide-enter-active .stagger-3 { transition-delay: 0.3s; }
-.content-slide-enter-active .stagger-4 { transition-delay: 0.4s; }
-
-.tracking-tighter { letter-spacing: -0.05em; }
+.animate-subtle-zoom { animation: subtle-zoom 10s linear infinite alternate; }
 </style>

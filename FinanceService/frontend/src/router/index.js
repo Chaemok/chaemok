@@ -17,7 +17,7 @@ const router = createRouter({
 
     // [Finance]
     { path: '/deposit', name: 'deposit', component: () => import('@/views/Finance/DepositListView.vue') },
-    { path: '/exchange', name: 'exchange', component: () => import('@/views/Finance/ExchangeView.vue') },
+    { path: '/exchange-rate', name: 'exchange-rate', component: () => import('@/views/Finance/ExchangeView.vue') },
     { path: '/stocks', name: 'stock-recommendation', component: () => import('@/views/Finance/StockRecommendationView.vue') },
 
     

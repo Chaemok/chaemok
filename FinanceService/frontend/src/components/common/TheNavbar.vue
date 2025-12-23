@@ -11,7 +11,7 @@ const isMobileMenuOpen = ref(false)
 const navLinks = [
   { name: '은행/증권사 찾기', path: '/map' },
   { name: '예/적금 추천', path: '/deposit' },
-  { name: '실시간 환율', path: '/exchange' },
+  { name: '실시간 환율', path: '/exchange-rate' },
   { name: '주식 추천', path: '/stocks' },
   { name: '커뮤니티', path: '/community' },
 ]

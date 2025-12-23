@@ -1,8 +1,5 @@
-import os
 import re
 import requests
-import traceback
-import FinanceDataReader as fdr
 from datetime import datetime, timedelta
 
 from django.conf import settings
@@ -12,7 +9,7 @@ from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -22,7 +19,9 @@ from .serializers import (
     DepositProductSerializer, SavingProductSerializer, 
     ExchangeRateSerializer, JoinedDepositOptionSerializer
 )
-from .utils.external_api import get_kis_data, get_gold_silver_price
+
+# 🐜 외부 유틸리티 로드
+from .utils.external_api import get_global_market_data
 from .utils.quant_analysis import get_stock_ranking
 
 # API KEY 설정
@@ -32,7 +31,7 @@ NAVER_CLIENT_ID = getattr(settings, 'NAVER_CLIENT_ID', "HuqovM0XqQzKa7kMeYBb")
 NAVER_CLIENT_SECRET = getattr(settings, 'NAVER_CLIENT_SECRET', "dnwCJRQx3i")
 
 # ==========================================
-# [데이터 수집] 예적금 정보 저장
+# [데이터 수집 및 상품 조회]
 # ==========================================
 def fetch_and_save_products():
     top_fin_grp_nos = ['020000', '030300']
@@ -68,9 +67,6 @@ def fetch_and_save_products():
             except Exception as e:
                 print(f"Error saving {ProductModel.__name__}: {e}")
 
-# ==========================================
-# [API Views] 금융 상품 및 지표
-# ==========================================
 class DepositProductListAPIView(APIView):
     permission_classes = [AllowAny]
     def get(self, request):
@@ -85,13 +81,16 @@ class SavingProductListAPIView(APIView):
         products = SavingProduct.objects.all().order_by('kor_co_nm')
         return Response(SavingProductSerializer(products, many=True).data)
 
-# 🐜 [에러 해결 포인트] StockTopAPIView 추가
+# ✅ [복구] StockTopAPIView (에러 원인 해결)
 class StockTopAPIView(APIView):
     permission_classes = [AllowAny]
     def get(self, request):
         result = get_stock_ranking(limit=5)
         return Response(result)
 
+# ==========================================
+# [사용자 가입 및 상품 추천]
+# ==========================================
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def join_deposit_option(request, option_pk):
@@ -102,6 +101,7 @@ def join_deposit_option(request, option_pk):
     option.contract_user.add(request.user)
     return Response({"is_joined": True, "message": "상품 가입이 완료되었습니다!"})
 
+# ✅ [복구] 가입한 상품 목록 조회
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def joined_products(request):
@@ -111,9 +111,6 @@ def joined_products(request):
         "total_count": deposit_opts.count()
     })
 
-# ==========================================
-# [알고리즘 & 추천]
-# ==========================================
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def recommend_products(request):
@@ -138,7 +135,7 @@ def recommend_stocks(request):
     except Exception as e: return JsonResponse({'error': str(e)}, status=500)
 
 # ==========================================
-# [외부 데이터] 환율, 뉴스, 지도
+# [외부 데이터 및 지표]
 # ==========================================
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -177,7 +174,7 @@ def finance_news_view(request):
         return Response(cleaned)
     except: return Response({"error": "News failed"}, status=500)
 
-
+# ✅ [복구] 은행 기반 상품 조회
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_bank_products(request):
@@ -186,17 +183,13 @@ def get_bank_products(request):
     products = DepositProduct.objects.filter(kor_co_nm__contains=clean_name)[:3]
     return Response(DepositProductSerializer(products, many=True).data)
 
+# ✅ [핵심 기능] yfinance 기반 시장 지표
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def get_stock_detail(request):
-    """
-    🐜 검색용 API: /api/finlife/stock-detail/?code=005930
-    """
-    code = request.GET.get('code')
-    is_index = request.GET.get('type') == 'index'
-    
-    if not code:
-        return Response({"error": "종목 코드가 필요합니다."}, status=400)
-        
-    data = get_kis_data(code, is_index=is_index)
-    return Response(data)
+def get_market_status(request):
+    try:
+        data = get_global_market_data()
+        return Response(data)
+    except Exception as e:
+        print(f"Market Status Error: {e}")
+        return Response({"error": "데이터 로드 실패"}, status=500)

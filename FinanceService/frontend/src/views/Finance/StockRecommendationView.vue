@@ -138,14 +138,14 @@ onMounted(() => {
           <table class="w-full border-collapse">
             <thead>
               <tr class="bg-slate-50/50 text-slate-400 text-[11px] font-black uppercase tracking-[0.2em]">
-                <th class="py-5 pl-10 text-left w-20">순위</th>
-                <th class="py-5 text-left">종목명</th>
-                <th class="py-5 text-center">종합점수</th>
-                <th class="py-5 text-right">배당률</th>
-                <th class="py-5 text-right">ROE</th>
+                <th class="py-5 pl-10 text-left w-20">ticker</th>
+                <th class="py-5 text-left">name</th>
+                <th class="py-5 text-center">score</th>
+                <th class="py-5 text-right">DIV</th>
+                <th class="py-5 text-right">ROE_est</th>
                 <th class="py-5 text-right">PER</th>
                 <th class="py-5 text-right">PBR</th>
-                <th class="py-5 pr-10 text-center">섹터</th>
+                <th class="py-5 pr-10 text-center">Sector</th>
               </tr>
             </thead>
             
