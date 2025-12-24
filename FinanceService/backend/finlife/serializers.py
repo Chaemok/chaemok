@@ -1,3 +1,4 @@
+# backend/finlife/serializers.py
 from rest_framework import serializers
 from .models import DepositProduct, DepositOptions, SavingProduct, SavingOptions, ExchangeRate
 
@@ -65,11 +66,18 @@ class SavingProductSerializer(serializers.ModelSerializer):
 # --- 4. 기타 조회용 ---
 class ProductSimpleSerializer(serializers.ModelSerializer):
     class Meta:
-        model = DepositProduct
+        model = DepositProduct # 적금용은 따로 만들어도 되지만, 필드가 같아서 공유 가능
         fields = ('kor_co_nm', 'fin_prdt_nm')
-
+        
 class JoinedDepositOptionSerializer(serializers.ModelSerializer):
     product = ProductSimpleSerializer(read_only=True)
     class Meta:
         model = DepositOptions
         fields = '__all__'
+
+class JoinedSavingOptionSerializer(serializers.ModelSerializer):
+    product = ProductSimpleSerializer(read_only=True)
+    class Meta:
+        model = SavingOptions
+        fields = '__all__'
+

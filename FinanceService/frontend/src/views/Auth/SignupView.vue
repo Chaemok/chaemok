@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import AuthLayout from '@/components/auth/AuthLayout.vue'
+import AuthLayout from '@/components/layout/AuthLayout.vue'
 import SignupForm from '@/components/auth/SignupForm.vue'
 import WelcomeModal from '@/components/auth/WelcomeModal.vue' // 🐜 컴포넌트 호출
 

@@ -7,7 +7,7 @@ import api from '@/api'
 import CommunityHeader from '@/components/community/CommunityHeader.vue'
 import BoardTabs from '@/components/community/BoardTabs.vue'
 import PostListItem from '@/components/community/PostListItem.vue'
-import CommunityAIBriefing from '@/components/community/CommunityAIBriefing.vue'
+import CommunityRelatedNews from '@/components/community/CommunityRelatedNews.vue'
 
 const router = useRouter()
 const posts = ref([])
@@ -53,8 +53,6 @@ onMounted(fetchPosts)
       
       <CommunityHeader />
 
-      <CommunityAIBriefing />
-      
       <BoardTabs :categories="categoryConfig" v-model:selected="selectedCategory" />
 
       <div v-if="!isLoading" class="space-y-5">
@@ -77,7 +75,7 @@ onMounted(fetchPosts)
       
       <div v-else class="flex flex-col items-center justify-center py-40 space-y-4">
         <span class="loading loading-spinner loading-lg text-blue-900"></span>
-        <p class="text-blue-900 font-black text-[11px] uppercase tracking-[0.3em] animate-pulse">Loading Smart Intelligence...</p>
+        <p class="text-blue-900 font-black text-[11px] uppercase tracking-[0.3em] animate-pulse">Loading Community...</p>
       </div>
 
     </div>

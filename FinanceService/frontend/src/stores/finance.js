@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import api from '@/api'
+import api from '@/api' // axios 인스턴스 (설정된 파일 경로 확인 필요)
 
 export const useFinanceStore = defineStore('finance', {
   state: () => ({
@@ -10,7 +10,7 @@ export const useFinanceStore = defineStore('finance', {
     news: [],
     
     // 2. 🐜 [수정] 실시간 시장 지표 (yfinance 10대 지표 전용)
-    // 초기값을 빈 객체 {}로 설정해서 백엔드의 10개 데이터를 통째로 받아야 해.
+    // 초기값을 빈 객체 {}로 설정해서 백엔드의 10개 데이터를 통째로 받음
     marketData: {}, 
     
     // 3. 퀀트 엔진 기반 주식 추천 데이터
@@ -24,22 +24,36 @@ export const useFinanceStore = defineStore('finance', {
   }),
 
   getters: {
+    // 특정 통화의 환율 정보를 가져오는 Getter
     getExchangeRate: (state) => (unit) => {
       if (!state.exchangeRates || state.exchangeRates.length === 0) return { deal_bas_r: '0' }
+      // USD, EUR 등 통화코드로 검색
       return state.exchangeRates.find(r => r.cur_unit === unit) || { deal_bas_r: '0' }
     }
   },
 
   actions: {
     /**
-     * 🐜 [수정] 실시간 글로벌 시장 지표 가져오기
-     * 이제 KIS/Gold가 아닌 yfinance 기반 10대 지표를 가져와.
+     * 💱 환율 정보 가져오기 (ExchangeView.vue를 위해 필수!)
+     */
+    async getExchangeRates() {
+      try {
+        const res = await api.get('finlife/exchange-rate/')
+        this.exchangeRates = res.data
+        console.log('✅ 환율 정보 로드 완료')
+      } catch (err) {
+        console.error('Exchange Rates 로드 실패:', err)
+      }
+    },
+
+    /**
+     * 🐜 [수정] 실시간 글로벌 시장 지표 가져오기 (yfinance)
      */
     async fetchMarketStatus() {
       this.isMarketLoading = true
       try {
         const res = await api.get('finlife/market-status/')
-        // 백엔드에서 온 { "NASDAQ": {...}, "KOSPI": {...} } 구조를 그대로 저장.
+        // 백엔드에서 온 { "NASDAQ": {...}, "KOSPI": {...} } 구조를 그대로 저장
         this.marketData = res.data 
         console.log('✅ 글로벌 10대 지표 로드 완료 (yfinance)')
       } catch (err) {
@@ -50,7 +64,7 @@ export const useFinanceStore = defineStore('finance', {
     },
 
     /**
-     * 퀀트 엔진 기반 주식 추천 가져오기 (기존 유지)
+     * 퀀트 엔진 기반 주식 추천 가져오기
      */
     async fetchStockRecommendations() {
       this.isRecLoading = true
@@ -67,17 +81,18 @@ export const useFinanceStore = defineStore('finance', {
     },
 
     /**
-     * HomeView 진입 시 필요한 데이터 병렬 호출 (기존 유지)
+     * HomeView 진입 시 필요한 데이터 병렬 호출
+     * (getExchangeRates를 재사용하여 코드 중복 제거)
      */
     async fetchQuickData() {
       this.isMainLoading = true
       try {
-        // 🐜 10대 지표를 포함하여 모든 데이터를 한 번에 가져와서 속도를 높여.
+        // 🐜 10대 지표, 추천주, 뉴스, 환율을 병렬로 요청
         await Promise.all([
           this.fetchMarketStatus(),
           this.fetchStockRecommendations(),
-          api.get('finlife/news/').then(res => this.news = res.data),
-          api.get('finlife/exchange-rate/').then(res => this.exchangeRates = res.data)
+          this.getExchangeRates(), // 위에서 만든 함수 재사용
+          api.get('finlife/news/').then(res => this.news = res.data)
         ])
         console.log('✅ 메인 화면 모든 데이터 동기화 완료 🐜')
       } catch (err) {
@@ -87,7 +102,7 @@ export const useFinanceStore = defineStore('finance', {
       }
     },
 
-    // 예적금 상품 정보 가져오기 (기존 유지)
+    // 예적금 상품 정보 가져오기
     async getDepositProducts() {
       try {
         const res = await api.get('finlife/deposits/')

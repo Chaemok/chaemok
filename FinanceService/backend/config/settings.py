@@ -75,7 +75,6 @@ INSTALLED_APPS = [
     'accounts',
     'community',
     'finlife',
-    'ai_analysis',
     'map',
 ]
 
@@ -192,7 +191,6 @@ APPEND_SLASH = True
 REST_AUTH = {
     'REGISTER_SERIALIZER': 'accounts.serializers.CustomRegisterSerializer',
     'USER_DETAILS_SERIALIZER': 'accounts.serializers.CustomUserDetailsSerializer',
-    'USE_JWT': False, # 토큰 방식에 따라 설정 (현재는 기본 Token 사용 중)
 }
 # ----------------------------------------------------
 # 6. REST Framework 설정 (403 에러 해결의 핵심)

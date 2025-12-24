@@ -15,17 +15,25 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        # 비로그인 유저는 비밀글이 아닌 것만 볼 수 있게 처리
+        queryset = Post.objects.all().order_by('-created_at')
+
+        # 🐜 [추가] 카테고리 필터링 (프론트에서 ?category=free 등으로 요청 시)
+        category = self.request.query_params.get('category')
+        if category and category != 'all':
+            queryset = queryset.filter(category=category)
+
+        # 비로그인 유저: 비밀글 제외
         if not user.is_authenticated:
-            return Post.objects.filter(is_secret=False).order_by('-created_at')
+            return queryset.filter(is_secret=False)
         
-        # 관리자는 전체, 일반 유저는 공개글 + 내 비밀글
+        # 관리자: 전체 조회
         if user.is_staff:
-            return Post.objects.all().order_by('-created_at')
+            return queryset
         
-        return Post.objects.filter(
+        # 일반 유저: 공개글 + 내 비밀글
+        return queryset.filter(
             Q(is_secret=False) | Q(user=user)
-        ).order_by('-created_at')
+        )
     
     def perform_create(self, serializer):
         # 🐜 프론트엔드에서 보낸 카테고리 확인 후 비밀글 강제 적용

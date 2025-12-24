@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
-import TheNavbar from '@/components/common/TheNavbar.vue'
+import TheNavbar from '@/components/layout/TheNavbar.vue'
 import TheFooter from '@/components/layout/TheFooter.vue'
 import SplashScreen from '@/components/common/SplashScreen.vue' 
 // 🤖 챗봇 컴포넌트 임포트 확인

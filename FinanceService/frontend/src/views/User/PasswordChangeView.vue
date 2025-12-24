@@ -1,7 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import api from '@/api'
-import AuthLayout from '@/components/auth/AuthLayout.vue'
+import AuthLayout from '@/components/layout/AuthLayout.vue'
 import PasswordChangeForm from '@/components/profile/PasswordChangeForm.vue'
 
 const router = useRouter()

@@ -18,8 +18,10 @@ const router = createRouter({
     // [Finance]
     { path: '/deposit', name: 'deposit', component: () => import('@/views/Finance/DepositListView.vue') },
     { path: '/exchange-rate', name: 'exchange-rate', component: () => import('@/views/Finance/ExchangeView.vue') },
+    { path: '/spot', name: 'spot', component: () => import('@/views/Finance/SpotProductView.vue') },
     { path: '/stocks', name: 'stock-recommendation', component: () => import('@/views/Finance/StockRecommendationView.vue') },
-
+    // [Youtube]
+    { path: '/youtube', name: 'youtube', component: () => import('@/views/Finance/YoutubeView.vue') },
     
     // [Map]
     { path: '/map', name: 'map', component: () => import('@/views/Map/MapView.vue') },
@@ -28,18 +30,13 @@ const router = createRouter({
     { path: '/mypage', name: 'mypage', component: () => import('@/views/User/MyPageView.vue') }, // 대시보드
     { path: '/profile', name: 'profile-detail', component: () => import('@/views/User/ProfileView.vue') }, // 상세 (비번확인)
     { path: '/profile/edit', name: 'profile-edit', component: () => import('@/views/User/ProfileEditView.vue') }, // 수정
-    {
-      path: '/profile/password',
-      name: 'password-change',
-      component: () => import('@/views/User/PasswordChangeView.vue'),
-      meta: { requiresAuth: true }
-    },
+    { path: '/profile/password', name: 'password-change', component: () => import('@/views/User/PasswordChangeView.vue'), meta: { requiresAuth: true } },
 
     // [Community]
     { path: '/community', name: 'community', component: () => import('@/views/Community/CommunityView.vue') },
     { path: '/community/create', name: 'post-create', component: () => import('@/views/Community/PostCreateView.vue'), meta: { requiresAuth: true } },
     { path: '/community/:id', name: 'post-detail', component: () => import('@/views/Community/PostDetailView.vue'), },
-    { path: '/community/:id/edit', name: 'post-edit', component: () => import('@/views/community/PostEditView.vue'), meta: { requiresAuth: true } }
+    { path: '/community/:id/edit', name: 'post-edit', component: () => import('@/views/Community/PostEditView.vue'), meta: { requiresAuth: true } }
   ]
 })
 
