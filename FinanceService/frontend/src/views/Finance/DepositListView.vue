@@ -8,7 +8,7 @@ import DepositProductCard from '@/components/deposit/DepositProductCard.vue'
 import DepositDetailModal from '@/components/deposit/DepositDetailModal.vue'
 import BasePagination from '@/components/common/BasePagination.vue'
 import PageHeader from '@/components/common/PageHeader.vue'
-import EmptyState from '@/components/common/EmptyState.vue'
+import EmptyState from '@/components/common/BaseEmpty.vue'
 
 const store = useFinanceStore()
 

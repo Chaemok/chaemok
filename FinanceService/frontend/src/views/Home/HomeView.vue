@@ -65,11 +65,15 @@ onMounted(async () => {
       </div>
 
       <section class="space-y-8 pb-10">
-        <h3 class="text-2xl font-black text-slate-900 tracking-tight px-6">나를 위한 맞춤 추천 ✨</h3>
+        <h3 class="text-2xl font-black text-slate-900 tracking-tight px-6">나를 위한 예/적금 맞춤 추천 ✨</h3>
         <div class="bg-white rounded-[3.5rem] p-10 shadow-xl border border-slate-100">
-          <HomeRecommend :items="financeStore.recommendations" :isLoading="financeStore.isRecLoading" />
+          <HomeRecommend 
+            :items="financeStore.recommendations" 
+            :message="financeStore.recommendationMessage"
+            :isLoading="financeStore.isRecLoading" 
+          />
         </div>
-      </section>
+</section>
     </main>
   </div>
 </template>

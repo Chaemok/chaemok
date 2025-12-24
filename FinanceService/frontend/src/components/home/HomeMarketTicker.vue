@@ -10,9 +10,17 @@ let timer = null
 const tickerItems = computed(() => {
   const data = financeStore.marketData
   if (!data || Object.keys(data).length === 0) return []
-  return Object.entries(data).map(([label, info]) => ({
-    label, value: info.value, change: info.change, rate: info.rate, isUp: info.isUp
-  }))
+  
+  // 🐜 [수정] info가 null인 경우(yfinance 에러 시)를 대비해 필터링 추가
+  return Object.entries(data)
+    .filter(([_, info]) => info !== null) 
+    .map(([label, info]) => ({
+      label, 
+      value: info.value, 
+      change: info.change, 
+      rate: info.rate, 
+      isUp: info.isUp
+    }))
 })
 
 // 시간 포맷 (모바일에서는 시/분만 보여줘서 공간 확보)

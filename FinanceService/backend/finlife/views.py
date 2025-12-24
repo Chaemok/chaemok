@@ -21,8 +21,13 @@ from .serializers import (
     ExchangeRateSerializer, JoinedDepositOptionSerializer, JoinedSavingOptionSerializer
 )
 
-# 🐜 외부 유틸리티 로드
-from .utils.external_api import get_global_market_data, get_exchange_history_data, get_spot_history_data
+# 🐜 [수정] 모든 외부 유틸리티를 안정적인 동기 방식으로 호출합니다.
+from .utils.external_api import (
+    get_global_market_data, 
+    get_exchange_history_data, 
+    get_spot_history_data,
+    get_stock_data 
+)
 from .utils.quant_analysis import get_stock_ranking
 from .utils.youtube_api import search_youtube_videos
 
@@ -83,7 +88,6 @@ class SavingProductListAPIView(APIView):
         products = SavingProduct.objects.all().order_by('kor_co_nm')
         return Response(SavingProductSerializer(products, many=True).data)
 
-# ✅ [복구] StockTopAPIView (에러 원인 해결)
 class StockTopAPIView(APIView):
     permission_classes = [AllowAny]
     def get(self, request):
@@ -113,29 +117,45 @@ def join_saving_option(request, option_pk):
     option.contract_user.add(request.user)
     return Response({"is_joined": True, "message": "적금 가입이 완료되었습니다!"})
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def joined_products(request):
     deposit_opts = DepositOptions.objects.filter(contract_user=request.user)
-    saving_opts = SavingOptions.objects.filter(contract_user=request.user) # 🐜 추가
-    
+    saving_opts = SavingOptions.objects.filter(contract_user=request.user)
     return Response({
         "joined_deposits": JoinedDepositOptionSerializer(deposit_opts, many=True).data,
-        "joined_savings": JoinedSavingOptionSerializer(saving_opts, many=True).data, # 🐜 추가
+        "joined_savings": JoinedSavingOptionSerializer(saving_opts, many=True).data,
         "total_count": deposit_opts.count() + saving_opts.count()
     })
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def recommend_products(request):
     user = request.user
-    user_salary = getattr(user, 'salary', 0) or 0
-    query = Q(salary__range=(user_salary - 10000000, user_salary + 10000000))
-    similar_users = get_user_model().objects.filter(query).exclude(id=user.id)
-    recommended = DepositOptions.objects.filter(contract_user__in=similar_users).annotate(cnt=Count('contract_user')).order_by('-cnt')[:5]
-    if not recommended.exists():
-        recommended = DepositOptions.objects.all().order_by('-intr_rate2')[:5]
-    return Response({"data": JoinedDepositOptionSerializer(recommended, many=True).data})
+    salary = getattr(user, 'salary', 0) or 0
+    assets = getattr(user, 'money', 0) or 0
+    risk = getattr(user, 'risk_appetite', 3) or 3
+    is_deposit_focus = assets > (salary * 2)
+    
+    if is_deposit_focus:
+        base_query = DepositOptions.objects.select_related('product')
+        p_type = "예금"
+    else:
+        base_query = SavingOptions.objects.select_related('product')
+        p_type = "적금"
+
+    if risk <= 2:
+        recommended = base_query.order_by('-intr_rate')[:5]
+        message = f"안정적인 자산 관리를 선호하는 회원님을 위해 금리가 높은 {p_type} 상품을 선정했습니다."
+    elif risk >= 4:
+        recommended = base_query.order_by('-intr_rate2')[:5]
+        message = f"수익률을 추구하는 회원님을 위해 우대 혜택이 큰 {p_type} 상품들을 모았습니다."
+    else:
+        recommended = base_query.filter(save_trm__gte=12).order_by('-intr_rate2')[:5]
+        message = f"밸런스가 좋은 {p_type} 상품을 추천합니다."
+
+    serializer = JoinedDepositOptionSerializer(recommended, many=True)
+    return Response({"message": message, "data": serializer.data})
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -149,11 +169,58 @@ def recommend_stocks(request):
     except Exception as e: return JsonResponse({'error': str(e)}, status=500)
 
 # ==========================================
-# [외부 데이터 및 지표]
+# [외부 데이터 및 지표 - 안정적인 동기 방식]
 # ==========================================
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_market_status(request):
+    """글로벌 시장 지표 (안전한 동기 방식)"""
+    try:
+        data = get_global_market_data() 
+        return Response(data)
+    except Exception as e:
+        print(f"Market Status Error: {e}")
+        return Response({"error": "데이터 로드 실패"}, status=500)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def stock_detail_api(request, symbol):
+    """주식 종목 상세 검색 및 차트 데이터 (안전한 동기 방식)"""
+    try:
+        data = get_stock_data(symbol) 
+        if not data:
+            return Response({"message": "종목을 찾을 수 없습니다."}, status=404)
+        return Response(data)
+    except Exception as e:
+        print(f"Stock API Error: {e}")
+        return Response({"error": "종목 조회 중 오류 발생"}, status=500)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def exchange_history(request):
+    """환율 차트 히스토리 (동기 방식)"""
+    code = request.GET.get('code', 'USD')
+    period = request.GET.get('period', '1mo')
+    start = request.GET.get('start')
+    end = request.GET.get('end')
+    data = get_exchange_history_data(code, period, start, end)
+    return JsonResponse(data, safe=False)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def spot_price_history(request):
+    """금/은 시세 조회 (동기 방식)"""
+    symbol_type = request.GET.get('type', 'GOLD')
+    start = request.GET.get('start')
+    end = request.GET.get('end')
+    data = get_spot_history_data(symbol_type, start, end)
+    return JsonResponse(data, safe=False)
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def exchange_rate(request):
+    """실시간 환율 목록 (DB 기반)"""
     if not ExchangeRate.objects.exists():
         for i in range(7):
             search_date = (datetime.now() - timedelta(days=i)).strftime('%Y%m%d')
@@ -177,67 +244,31 @@ def exchange_rate(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def finance_news_view(request):
-    """
-    네이버 뉴스 검색 API (카테고리 지원)
-    GET /api/finlife/news/?category=stock
-    """
-    category = request.GET.get('category', 'general') # 기본값: 종합
-    
-    # 🐜 카테고리별 검색어 매핑
+    category = request.GET.get('category', 'general')
     keyword_map = {
-        'general': '금융 경제',
-        'stock': '주식 시장 전망',
-        'crypto': '비트코인 가상화폐',
-        'realestate': '부동산 시장 분양',
-        'global': '미국 증시 금리',
-        'tech': '핀테크 AI 금융'
+        'general': '금융 경제', 'stock': '주식 시장 전망', 'crypto': '비트코인 가상화폐',
+        'realestate': '부동산 시장 분양', 'global': '미국 증시 금리', 'tech': '핀테크 AI 금융'
     }
-    
-    # 검색어 결정 (없으면 기본값)
     query = keyword_map.get(category, '금융 경제')
-
     url = "https://openapi.naver.com/v1/search/news.json"
-    headers = {
-        "X-Naver-Client-Id": NAVER_CLIENT_ID, 
-        "X-Naver-Client-Secret": NAVER_CLIENT_SECRET
-    }
-    
-    # 🐜 display를 10~20으로 늘려서 풍부하게 가져옵니다.
-    params = {
-        "query": query, 
-        "display": 10, # 10개씩 가져오기
-        "sort": "sim"  # 관련도순 (date로 하면 최신순)
-    }
+    headers = {"X-Naver-Client-Id": NAVER_CLIENT_ID, "X-Naver-Client-Secret": NAVER_CLIENT_SECRET}
+    params = {"query": query, "display": 10, "sort": "sim"}
     
     try:
         res = requests.get(url, headers=headers, params=params)
-        data = res.json()
-        items = data.get('items', [])
-        
-        # HTML 태그 제거 및 날짜 포맷팅
+        items = res.json().get('items', [])
         cleaner = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
         cleaned_list = []
-        
         for i in items:
-            title = re.sub(cleaner, '', i['title'])
-            desc = re.sub(cleaner, '', i['description'])
-            # 날짜 예쁘게 자르기
-            pub_date = i['pubDate'][:16] # "Mon, 22 Dec 2025" 형태까지만
-            
             cleaned_list.append({
-                "title": title,
-                "description": desc, # 설명 추가
+                "title": re.sub(cleaner, '', i['title']),
+                "description": re.sub(cleaner, '', i['description']),
                 "link": i['link'],
-                "pubDate": pub_date
+                "pubDate": i['pubDate'][:16]
             })
-            
         return Response(cleaned_list)
-        
-    except Exception as e:
-        print(f"News Error: {e}")
-        return Response({"error": "News failed"}, status=500)
+    except: return Response({"error": "News failed"}, status=500)
 
-# ✅ [복구] 은행 기반 상품 조회
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_bank_products(request):
@@ -246,58 +277,23 @@ def get_bank_products(request):
     products = DepositProduct.objects.filter(kor_co_nm__contains=clean_name)[:3]
     return Response(DepositProductSerializer(products, many=True).data)
 
-# ✅ [핵심 기능] yfinance 기반 시장 지표
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def get_market_status(request):
-    try:
-        data = get_global_market_data()
-        return Response(data)
-    except Exception as e:
-        print(f"Market Status Error: {e}")
-        return Response({"error": "데이터 로드 실패"}, status=500)
-    
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def exchange_history(request):
-    """
-    차트 데이터 요청 API (View Layer)
-    """
-    code = request.GET.get('code', 'USD')
-    period = request.GET.get('period', '1mo') # 1mo, 3mo, 6mo, 1y
-
-    # 🐜 [추가] 날짜 파라미터 수신
-    start_date = request.GET.get('start')
-    end_date = request.GET.get('end')
-
-    # 함수에 날짜 인자 추가 전달
-    data = get_exchange_history_data(code, period, start_date, end_date)
-    
-    return JsonResponse(data, safe=False)
-
-@api_view(['GET'])
-@permission_classes([AllowAny]) # 로그인 안 해도 검색 가능하게
 def youtube_search(request):
-    """
-    유튜브 검색 API 프록시
-    GET /api/finlife/youtube/?keyword=재테크
-    """
-    keyword = request.GET.get('keyword', '재테크') # 기본 검색어
+    keyword = request.GET.get('keyword', '재테크')
     videos = search_youtube_videos(keyword)
     return JsonResponse(videos, safe=False)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def spot_price_history(request):
+def stock_detail_api(request, symbol):
     """
-    금/은 시세 조회 API (F04 구현용)
-    GET /api/finlife/spot-history/?type=GOLD&start=2023-01-01&end=2023-12-31
+    🐜 symbol 자리에 '삼성전자'가 들어와도 처리 가능하도록 설계
     """
-    symbol_type = request.GET.get('type', 'GOLD') # GOLD or SILVER
-    start = request.GET.get('start')
-    end = request.GET.get('end')
+    # 쿼리 파라미터가 아닌 URL 경로에서 '삼성전자'를 읽어옵니다.
+    data = get_stock_data(symbol) 
     
-    # 🐜 분리한 함수 호출
-    data = get_spot_history_data(symbol_type, start, end)
-    
-    return JsonResponse(data, safe=False)
+    if not data:
+        return Response({"message": "종목을 찾을 수 없습니다. (정확한 티커나 종목번호를 입력해주세요)"}, status=404)
+        
+    return Response(data)

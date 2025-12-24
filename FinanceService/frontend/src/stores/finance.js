@@ -101,6 +101,19 @@ export const useFinanceStore = defineStore('finance', {
         this.isMainLoading = false
       }
     },
+    async fetchRecommendations() {
+      this.isRecLoading = true
+      try {
+        // 백엔드: views.recommend_products 호출
+        const res = await api.get('finlife/deposits/recommend/')
+        this.recommendations = res.data.data 
+        console.log('✅ 맞춤 예금 추천 로드 완료')
+      } catch (err) {
+        console.error('추천 상품 로드 실패:', err)
+      } finally {
+        this.isRecLoading = false
+      }
+    },
 
     // 예적금 상품 정보 가져오기
     async getDepositProducts() {
