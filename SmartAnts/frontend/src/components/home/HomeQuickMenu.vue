@@ -14,7 +14,7 @@
 const menus = [
   { name: '주변 은행', icon: '📍', path: '/map' },
   { name: '환율 계산기', icon: '🧮', path: '/exchange' },
-  { name: 'AI 주식분석', icon: '🤖', path: '/stocks/recommend' },
+  // { name: 'AI 주식분석', icon: '🤖', path: '/stocks/recommend' },
   { name: '커뮤니티', icon: '💬', path: '/community' },
 ]
 </script>
