@@ -27,7 +27,7 @@
             <li><router-link to="/news" class="hover:text-blue-400 transition-colors">금융 뉴스</router-link></li>
             <li><router-link to="/youtube" class="hover:text-blue-400 transition-colors">금융 Youtube</router-link></li>
             <li><router-link to="/deposit" class="hover:text-blue-400 transition-colors">예/적금 비교</router-link></li>
-            <li><router-link to="/stocks" class="hover:text-blue-400 transition-colors">주식 종목 추천</router-link></li>
+            <!-- <li><router-link to="/stocks" class="hover:text-blue-400 transition-colors">주식 종목 추천</router-link></li> -->
             <li><router-link to="/market" class="hover:text-blue-400 transition-colors">주식 시장 대시보드</router-link></li>
             <li><router-link to="/market/exchange-rate" class="hover:text-blue-400 transition-colors">환율 정보</router-link></li>
             <li><router-link to="/market/commodity" class="hover:text-blue-400 transition-colors">금/은 정보</router-link></li>

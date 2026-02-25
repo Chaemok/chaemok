@@ -17,7 +17,8 @@ const mainMenus = [
   },
   { 
     name: '금융 상품', path: '/deposit', 
-    sub: [{ name: '예/적금 상품', path: '/deposit' }, { name: '주식 종목 추천', path: '/stocks' }]
+    sub: [{ name: '예/적금 상품', path: '/deposit' }]
+    // { name: '주식 종목 추천', path: '/stocks' }]
   },
   { 
     name: '금융 시장 지표', path: '/market', 
