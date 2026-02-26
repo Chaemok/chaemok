@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}회원가입{% endblock %}
+
+{% block content %}
+<section class="panel form-panel">
+  <h1 class="form-title">회원가입</h1>
+
+  <!-- ✅ 파일 업로드를 위해 enctype 꼭 필요 -->
+  <form method="post" enctype="multipart/form-data" class="form-grid">
+    {% csrf_token %}
+
+    <!-- ✅ 폼 에러 표시 -->
+    {% if form.errors %}
+      <ul class="form-errors">
+        {% for field, errs in form.errors.items %}
+          <li><strong>{{ field }}:</strong> {{ errs|striptags }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {{ form.non_field_errors }}
+    
+    <div class="field">
+      <div class="label">성 last name</div>
+      <input type="text" name="last_name" class="input" required value="{{ form.last_name.value|default_if_none:'' }}">
+    </div>
+    
+    <div class="field">
+      <div class="label">이름 first name </div>
+      <input type="text" name="first_name" class="input" required value="{{ form.first_name.value|default_if_none:'' }}">
+    </div>
+    
+    <div class="field">
+      <div class="label">아이디</div>
+      <input type="text" name="username" class="input" required value="{{ form.username.value|default_if_none:'' }}">
+    </div>
+    
+    <div class="field">
+      <div class="label">닉네임</div>
+      <input type="text" name="nickname" class="input" required value="{{ form.nickname.value|default_if_none:'' }}">
+    </div>
+    
+    <div class="field">
+      <div class="label">생년월일</div>
+      <input type="date" name="birthdate" class="input" value="{{ form.birthdate.value|default_if_none:'' }}">
+    </div>
+    
+    <div class="field">
+      <div class="label">휴대폰 번호</div>
+      <input type="text" name="phone_number" class="input" value="{{ form.phone_number.value|default_if_none:'' }}">
+    </div>
+    
+    <div class="field">
+      <div class="label">이메일</div>
+      <input type="email" name="email" class="input" value="{{ form.email.value|default_if_none:'' }}">
+    </div>
+
+    <div class="field">
+      <div class="label">프로필 이미지</div>
+      <input type="file" name="profile_image" accept="image/*" class="input">
+    </div>
+
+    <div class="field">
+      <div class="label">비밀번호</div>
+      <input type="password" name="password1" class="input" required>
+    </div>
+
+    <div class="field">
+      <div class="label">비밀번호 확인</div>
+      <input type="password" name="password2" class="input" required>
+    </div>
+
+    <div class="row" style="justify-content: flex-end;">
+      <button type="submit" class="btn primary">가입하기</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

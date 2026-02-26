@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}게시글 수정{% endblock %}
+{% block content %}
+<section class="panel form-panel">
+  <h1>게시글 수정</h1>
+  <form method="post" class="form-grid">
+    {% csrf_token %}
+    <div class="field">
+      <div class="label">제목</div>
+      {{ form.title }}
+    </div>
+    <div class="field">
+      <div class="label">내용</div>
+      {{ form.content }}
+    </div>
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <a href="{% url 'posts:detail_post' post.id %}" class="btn">취소</a>
+      <button type="submit" class="btn primary">저장</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

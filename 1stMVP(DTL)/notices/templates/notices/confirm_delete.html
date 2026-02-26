@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}공지 삭제{% endblock %}
+{% block content %}
+<section class="panel">
+  <h2>공지 삭제</h2>
+  <p>정말로 “{{ notice.title }}”를 삭제하시겠습니까?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">삭제</button>
+    <a href="{% url 'notices:detail_notice' notice.id %}" class="btn">취소</a>
+  </form>
+</section>
+{% endblock %}

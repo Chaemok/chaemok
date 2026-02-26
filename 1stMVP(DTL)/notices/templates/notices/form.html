@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}공지 {% if mode == 'create' %}작성{% else %}수정{% endif %}{% endblock %}
+{% block content %}
+<section class="panel form-panel">
+  <h1>공지 {% if mode == 'create' %}작성{% else %}수정{% endif %}</h1>
+  <form method="post" class="form-grid">
+    {% csrf_token %}
+    <div class="field">
+      <div class="label">제목</div>
+      {{ form.title}}
+    </div>
+    <div class="field">
+      <div class="label">내용</div>
+      {{ form.content}}
+    </div>
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button type="submit" class="btn primary">저장</button>
+      <a href="{% if mode == 'update' %}{% url 'notices:detail_notice' notice.id %}{% else %}{% url 'notices:index' %}{% endif %}" class="btn">취소</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

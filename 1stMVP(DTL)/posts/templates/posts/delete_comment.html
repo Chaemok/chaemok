@@ -1,0 +1,31 @@
+<!-- posts/templates/posts/delete_comment.html -->
+{% comment %} <!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>댓글 삭제</title>
+</head>
+<body>
+    <h2>댓글 삭제</h2>
+    <p>정말로 이 댓글을 삭제하시겠습니까?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">삭제</button>
+    </form>
+    <a href="{% url 'posts:detail_post' post.id %}">취소</a>
+</body>
+</html> {% endcomment %}
+
+{% extends "base.html" %}
+{% block title %}댓글 삭제{% endblock %}
+{% block content %}
+<section class="panel">
+  <h2>댓글 삭제</h2>
+  <p>정말로 이 댓글을 삭제하시겠습니까?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn primary">삭제</button>
+    <a href="{% url 'posts:detail_post' post.id %}" class="btn">취소</a>
+  </form>
+</section>
+{% endblock %}

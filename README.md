@@ -1,16 +1,36 @@
-## Hi there 👋
+## 똑똑한 금융생활! SMART ANTS
 
-<!--
-**Chaemok/chaemok** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+* * *
 
-Here are some ideas to get you started:
+## **📑** 목차
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+1. [프로젝트 소개](#-프로젝트-소개)
+2. [주요 기능](#-주요-기능)
+3. [기술 스택](#️-tech-stack)
+4. [프로젝트 구조](#-프로젝트-구조)
+5. [아키텍처](#️-아키텍처)
+6. [ERD](#-erd)
+7. [설치 및 실행 방법](#️-설치-및-실행-방법)
+8. [공통 파트](#공통-파트)
+9. [담당 파트회](#-담당-파트)
+10. [기타 정보](#기타-정보)
+
+---
+
+## **📋 프로젝트 소개**
+
+**SMART ANTS**는 SSAFY(삼성 청년 SW 아카데미) 프로젝트로 개발된 웹 서비스입니다.
+
+사용자는 본 서비스를 통해 금융 관련 정보를 한 눈에, 쉽게 얻을 수 있습니다.
+
+1. 주식 시장 정보
+
+2. 예적금 상품 조회 및 추천
+
+3. 금융 관련 기사
+
+4. 금융 관련 영상(Youtube)
+
+5. 금/은 현물 시세
+
+6. 근처 은행/ATM/증권사 위치 조회
