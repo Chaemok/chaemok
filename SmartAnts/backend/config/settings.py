@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import dj_database_url
 
 # =====================================================
 # BASE DIR
@@ -8,23 +9,28 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # =====================================================
-# SECURITY / DEBUG (로컬)
+# SECURITY / DEBUG (Render 환경 대응)
 # =====================================================
-SECRET_KEY = "dev-secret-key"
-DEBUG = True
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
+DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".onrender.com"]
+RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 
 # =====================================================
-# GMS (Gemini) - 로컬 전용 하드코딩
+# GMS (Gemini) - 환경 변수 우선
 # =====================================================
-GMS_KEY = "S14P02DB09-afa432ce-5c10-4b60-8f6b-3273cace779a"
+GMS_KEY = os.environ.get("GMS_KEY", "S14P02DB09-afa432ce-5c10-4b60-8f6b-3273cace779a")
 GMS_ENDPOINT_BASE = (
     "https://gms.ssafy.io/gmsapi/"
     "generativelanguage.googleapis.com/v1beta/models/"
     "gemini-2.0-flash:generateContent"
 )
+
+YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "AIzaSyAJbfefA6rNy64Bm-qgJHe2vvvFh1sBZvE")
 
 
 # =====================================================
@@ -67,6 +73,7 @@ SITE_ID = 1
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -78,9 +85,9 @@ MIDDLEWARE = [
 
 
 # =====================================================
-# CORS / CSRF (로컬 안정성 최우선)
+# CORS / CSRF (Render/Vercel 대응)
 # =====================================================
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True  # 배포 단계에서는 필요한 도메인만 허용하는 것을 권장합니다.
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
@@ -89,6 +96,10 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:8000",
 ]
+
+FRONTEND_URL = os.environ.get("FRONTEND_URL")
+if FRONTEND_URL:
+    CSRF_TRUSTED_ORIGINS.append(FRONTEND_URL)
 
 
 # =====================================================
@@ -116,13 +127,13 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 
 # =====================================================
-# DATABASE (SQLite 로컬)
+# DATABASE (SQLite + Render Postgres 지원)
 # =====================================================
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+    )
 }
 
 
@@ -170,6 +181,10 @@ REST_FRAMEWORK = {
 # =====================================================
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# WhiteNoise storage for compressed/cached files
+if not DEBUG:
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
