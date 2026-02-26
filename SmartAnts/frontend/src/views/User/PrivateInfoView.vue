@@ -1,11 +1,13 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import SecurityModal from '@/components/auth/SecurityModal.vue' // 방금 만든 모달 가져오기
 
 const authStore = useAuthStore()
 const router = useRouter()
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
 
 const isVerified = ref(false) // 인증 완료 여부
 const showModal = ref(true)   // 모달 표시 여부
@@ -51,7 +53,7 @@ const handleClose = () => {
         
         <div class="flex items-center gap-6 pb-8 border-b border-slate-50">
           <div class="w-20 h-20 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
-             <img v-if="authStore.user?.profile_image" :src="'http://127.0.0.1:8000' + authStore.user.profile_image" class="w-full h-full object-cover" />
+             <img v-if="authStore.user?.profile_image" :src="API_URL + authStore.user.profile_image" class="w-full h-full object-cover" />
              <div v-else class="w-full h-full flex items-center justify-center text-3xl">🐜</div>
           </div>
           <div>

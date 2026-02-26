@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, reactive, computed } from 'vue'
-import axios from 'axios'
+import instance from '@/api/index'
 import { useAuthStore } from '@/stores/auth' 
 import { useFinanceStore } from '@/stores/finance'
 import PageHeader from '@/components/common/PageHeader.vue'
@@ -44,7 +44,7 @@ const fetchData = async () => {
   const currentWeights = weightMap[userProfile.investment_style]
 
   try {
-    const res = await axios.get('http://127.0.0.1:8000/api/finlife/recommend-stocks/', {
+    const res = await instance.get('/finlife/recommend-stocks/', {
       params: currentWeights 
     })
     

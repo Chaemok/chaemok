@@ -18,7 +18,7 @@ export const usePostStore = defineStore('posts', () => {
   const totalCount = ref(0)   // 페이지네이션용 전체 개수
 
   // API 기본 URL (설정에 따라 다를 수 있음)
-  const API_URL = 'http://127.0.0.1:8000/api/posts' //로컬
+  const API_URL = '/posts'
 
   // 2. Actions (기능)
   

@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, inject, watch } from 'vue'
 import { useFinanceStore } from '@/stores/finance'
 import { useAuthStore } from '@/stores/auth'
-import axios from 'axios'
+import instance from '@/api/index'
 import { useRouter } from 'vue-router'
 
 // 컴포넌트 임포트
@@ -61,9 +61,7 @@ const fetchRecommendations = async () => {
 
   loading.value = true
   try {
-    const res = await axios.get('http://127.0.0.1:8000/api/finlife/recommend/', {
-      headers: { Authorization: `Token ${authStore.token}` }
-    })
+    const res = await instance.get('/finlife/recommend/')
     
     const responseData = res.data.data || []
     recommendMessage.value = res.data.message || '회원님을 위한 맞춤 추천입니다.'

@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import axios from 'axios'
+import instance from '@/api/index'
 
 const props = defineProps({
   isOpen: Boolean,
@@ -68,11 +68,9 @@ const joinProduct = async (option) => {
     // 🐜 [수정 끝]
 
     // 🐜 [확인용 로그] (배포 시 주석 처리 가능)
-    // console.log(`가입 요청: /api/finlife/${urlType}/join/${option.id}/`)
+    // console.log(`가입 요청: /finlife/${urlType}/join/${option.id}/`)
 
-    await axios.post(`http://127.0.0.1:8000/api/finlife/${urlType}/join/${option.id}/`, {}, {
-      headers: { Authorization: `Token ${authStore.token}` }
-    })
+    await instance.post(`/finlife/${urlType}/join/${option.id}/`)
     
     // 🐜 가입 성공 메시지 수정
     alert(`🎉 [${option.save_trm}개월] 상품 가입이 완료되었습니다!\n마이페이지에서 확인해보세요.`)

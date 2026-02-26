@@ -72,7 +72,7 @@
 
 <script setup>
 import { ref, nextTick, onMounted } from 'vue'
-import axios from 'axios'
+import instance from '@/api/index'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
@@ -102,10 +102,8 @@ const sendMessage = async () => {
 
   try {
     // 2. 백엔드 AI API 호출 (aibot 앱)
-    const res = await axios.post('http://127.0.0.1:8000/aibot/recommend/', {
+    const res = await instance.post('/aibot/recommend/', {
       message: text // 필요 시 백엔드에서 사용자 입력도 참고하도록 수정 가능
-    }, {
-      headers: { Authorization: `Token ${authStore.token}` }
     })
 
     // 3. 응답 처리 (JSON 파싱)

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import instance from '@/api/index'
 import YoutubeSearchBar from '@/components/youtube/YoutubeSearchBar.vue'
 import YoutubeVideoCard from '@/components/youtube/YoutubeVideoCard.vue'
 import YoutubePlayerModal from '@/components/youtube/YoutubePlayerModal.vue'
@@ -27,7 +27,7 @@ const searchVideos = async (query) => {
   isLoading.value = true
   
   try {
-    const res = await axios.get('http://127.0.0.1:8000/api/finlife/youtube/', {
+    const res = await instance.get('/finlife/youtube/', {
       params: { keyword: query }
     })
     videos.value = res.data
