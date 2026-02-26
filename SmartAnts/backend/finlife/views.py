@@ -43,8 +43,8 @@ from .utils.youtube_api import search_youtube_videos
 # API KEY 설정
 FINLIFE_API_KEY = getattr(settings, 'FINLIFE_API_KEY', "3c4cbc25442ea93a9a4361c35eb0cf14")
 EXIM_API_KEY = getattr(settings, 'EXIM_API_KEY', "VMyu0svCx0AhAHQms9zCgdFuWrfIUFiu")
-NAVER_CLIENT_ID = getattr(settings, 'NAVER_CLIENT_ID', "HuqovM0XqQzKa7kMeYBb")
-NAVER_CLIENT_SECRET = getattr(settings, 'NAVER_CLIENT_SECRET', "dnwCJRQx3i")
+NAVER_CLIENT_ID = settings.NAVER_CLIENT_ID
+NAVER_CLIENT_SECRET = settings.NAVER_CLIENT_SECRET
 
 User = get_user_model()
 # ==========================================

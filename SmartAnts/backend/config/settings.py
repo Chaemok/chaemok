@@ -21,16 +21,21 @@ if RENDER_EXTERNAL_HOSTNAME:
 
 
 # =====================================================
-# GMS (Gemini) - 환경 변수 우선
+# EXTERNAL API KEYS (환경 변수 우선)
 # =====================================================
 GMS_KEY = os.environ.get("GMS_KEY", "S14P02DB09-afa432ce-5c10-4b60-8f6b-3273cace779a")
-GMS_ENDPOINT_BASE = (
+GMS_ENDPOINT_BASE = os.environ.get("GMS_ENDPOINT_BASE", (
     "https://gms.ssafy.io/gmsapi/"
     "generativelanguage.googleapis.com/v1beta/models/"
     "gemini-2.0-flash:generateContent"
-)
+))
 
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "AIzaSyAJbfefA6rNy64Bm-qgJHe2vvvFh1sBZvE")
+
+# 카카오 & 네이버 API
+KAKAO_REST_KEY = os.environ.get("KAKAO_REST_KEY", "676d89680b40b5e9fa41b47be77242ab")
+NAVER_CLIENT_ID = os.environ.get("NAVER_CLIENT_ID", "HuqovM0XqQzKa7kMeYBb")
+NAVER_CLIENT_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "dnwCJRQx3i")
 
 
 # =====================================================

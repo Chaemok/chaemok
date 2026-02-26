@@ -3,9 +3,10 @@ import requests
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny
+from django.conf import settings
 
 # 🐜 본인의 API 키인지 꼭 확인!
-KAKAO_REST_KEY = '676d89680b40b5e9fa41b47be77242ab'
+KAKAO_REST_KEY = getattr(settings, 'KAKAO_REST_KEY', '676d89680b40b5e9fa41b47be77242ab')
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
